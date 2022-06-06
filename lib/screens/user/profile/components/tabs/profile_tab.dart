@@ -4,7 +4,7 @@ import 'package:challenger/charts/stats_user.dart';
 
 import 'package:challenger/screens/user/profile/components/challenge_sized_box.dart';
 import 'package:challenger/user/user.dart';
-import 'package:challenger/user/user_manager.dart';
+import 'package:challenger/services/user_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

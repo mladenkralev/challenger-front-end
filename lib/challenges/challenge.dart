@@ -10,13 +10,16 @@ class Challenge {
   DateTime startDate;
   DateTime finalDate;
 
-  Challenge(int id, String title, String description, Occurrences occurrences, DateTime startDate, DateTime endDate) {
+  double numberOfProgressHits;
+
+  Challenge(int id, String title, String description, Occurrences occurrences, DateTime startDate, DateTime endDate, double numberOfProgressHits) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.occurrences = occurrences;
     this.startDate = startDate;
     this.finalDate = endDate;
+    this.numberOfProgressHits = numberOfProgressHits;
   }
 
   factory Challenge.fromJson(Map<String, dynamic> json) {
@@ -26,7 +29,8 @@ class Challenge {
         json['description'],
         json['occurrences'],
         json['startDate'],
-        json['endDate']);
+        json['endDate'],
+        json['numberOfProgressHits']);
   }
 
   static List<Challenge> fromList(List<dynamic> json) {
@@ -38,7 +42,8 @@ class Challenge {
                 element['description'],
                 OccurrencesTransformer.getEnumOccurrences(element['occurrences']),
                 parseDate(element['startDate']),
-                parseDate(element['endDate']));
+                parseDate(element['endDate']),
+                element['numberOfProgressHits']);
       challenges.add(challenge);
     });
     return challenges;

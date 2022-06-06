@@ -173,7 +173,8 @@ class _AddCardState extends State<AddCard> {
                               OccurrencesTransformer.getEnumOccurrences(
                                   occurrences[occurrencesIndex]),
                               null,
-                              null));
+                              null,
+                              100));
                           Navigator.pop(context);
                         },
                       ),

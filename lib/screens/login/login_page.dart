@@ -1,6 +1,6 @@
 import 'package:challenger/configuration.dart';
 import 'package:challenger/services/login_service.dart';
-import 'package:challenger/user/user_manager.dart';
+import 'package:challenger/services/user_manager.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {

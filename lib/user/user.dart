@@ -8,6 +8,7 @@ class User {
   String _email;
   String _username;
   String _title;
+  String _jwtToken;
 
   bool _active;
   ChallengerFactory challengeManager;
@@ -20,6 +21,7 @@ class User {
         _email = json['email'],
         _username = json['username'],
         _active = json['active'],
+        _jwtToken = token,
         challengeManager = createUserChallengeManager(json);
 
   static ChallengerFactory createUserChallengeManager(
@@ -35,6 +37,8 @@ class User {
   int get level => _level ?? 1;
 
   String get email => _email ?? "dummy@notfound.com";
+
+  String get token => _jwtToken ?? "invalid_token";
 
   String get username => _username ?? "Dummy";
 

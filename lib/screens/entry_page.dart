@@ -1,5 +1,5 @@
 import 'package:challenger/screens/user/profile/home_page.dart';
-import 'package:challenger/user/user_manager.dart';
+import 'package:challenger/services/user_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,11 +14,7 @@ class EntryPage extends StatefulWidget {
 }
 
 class _EntryPageState extends State<EntryPage> {
-
-  UserManager userManager;
-  _EntryPageState() {
-    userManager = new UserManager.empty();
-  }
+  final userManager = locator<UserManager>();
 
   @override
   void initState() {

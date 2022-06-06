@@ -13,12 +13,6 @@ class UserManager {
   static const String ASSIGNED_CHALLENGES = "assignedToUserChallenges";
   static const String CREATED_CHALLENGES = "createdByUserChallenges";
 
-
-  factory UserManager.empty() {
-    return UserManager._internal(null);
-  }
-  UserManager._internal(this.user);
-
   UserManager attachUser(User user) {
     this.user = user;
     return this;
@@ -36,16 +30,6 @@ class UserManager {
     return user.challengeManager.getChallenges(ASSIGNED_CHALLENGES);
   }
 
-  Future<List<Challenge>> dummyMethod() {
-    return Future<
-        List<Challenge>>.delayed(
-        const Duration(seconds: 2),
-            () =>
-            List.generate(10, (index) =>
-            new Challenge(0, "Test", "test", Occurrences.DAY, DateTime.now(),
-                DateTime.now())
-            ));
-  }
   List<Challenge> getCompletedChallenges() {
     return user.challengeManager.getChallenges(ASSIGNED_CHALLENGES);
   }

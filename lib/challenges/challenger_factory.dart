@@ -10,6 +10,7 @@ class ChallengerFactory {
   static final Map<String, List<Challenge> > _cache = <String, List<Challenge> >{};
 
   List<Challenge> addChallenges(String nameOfChallenges, List<Challenge> challenges) {
+    _cache.clear();
     return _cache.putIfAbsent( nameOfChallenges, () => challenges);
   }
 

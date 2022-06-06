@@ -12,19 +12,23 @@ class ChallengeCard extends StatefulWidget {
   ChallengeCard(Key key, this.challenge) : super(key: key);
 
   @override
-  _ChallengeCardState createState() => _ChallengeCardState();
+  ChallengeCardState createState() => ChallengeCardState();
 }
 
 const loremIpsum =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
-class _ChallengeCardState extends State<ChallengeCard> {
+class ChallengeCardState extends State<ChallengeCard> {
   bool collapsed = true;
 
   double cardRadius = 20;
 
+  double challengeProgress = 0;
+
   @override
   Widget build(BuildContext context) {
+    challengeProgress = widget.challenge.numberOfProgressHits / 100;
+
     return GestureDetector(
         onTap: () {
           setState(() {
@@ -76,8 +80,8 @@ class _ChallengeCardState extends State<ChallengeCard> {
                     leading: new CircularPercentIndicator(
                       radius: 45.0,
                       lineWidth: 4.0,
-                      percent: 0.10,
-                      center: new Text("10%"),
+                      percent: challengeProgress,
+                      center: new Text(challengeProgress.toString()),
                       progressColor: Colors.red,
                     ),
                     title: Text(widget.challenge.title),
@@ -121,8 +125,8 @@ class _ChallengeCardState extends State<ChallengeCard> {
                   leading: new CircularPercentIndicator(
                     radius: 45.0,
                     lineWidth: 4.0,
-                    percent: 0.10,
-                    center: new Text("10%"),
+                    percent: challengeProgress,
+                    center: new Text(challengeProgress.toString()),
                     progressColor: Colors.red,
                   ),
                   title: Text(widget.challenge.title),
@@ -153,5 +157,12 @@ class _ChallengeCardState extends State<ChallengeCard> {
         ),
       ),
     );
+  }
+
+  updateChallengeProgress(){
+    setState(() {
+      challengeProgress = widget.challenge.numberOfProgressHits / 100;
+      print(challengeProgress);
+    });
   }
 }

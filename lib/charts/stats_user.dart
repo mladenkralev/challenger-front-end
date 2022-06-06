@@ -1,6 +1,6 @@
 import 'package:challenger/global_constants.dart';
 import 'package:challenger/user/user.dart';
-import 'package:challenger/user/user_manager.dart';
+import 'package:challenger/services/user_manager.dart';
 import 'package:flutter/material.dart';
 
 class UserStats extends StatefulWidget {

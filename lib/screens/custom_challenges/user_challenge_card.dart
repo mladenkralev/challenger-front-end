@@ -1,7 +1,7 @@
 import 'package:challenger/challenges/challenge.dart';
 import 'package:challenger/time/occurrences.dart';
 import 'package:challenger/user/user.dart';
-import 'package:challenger/user/user_manager.dart';
+import 'package:challenger/services/user_manager.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
