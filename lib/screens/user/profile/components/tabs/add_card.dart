@@ -1,6 +1,7 @@
 import 'package:challenger/challenges/challenge.dart';
 import 'package:challenger/global_constants.dart';
 import 'package:challenger/notifications/notificationManager.dart';
+import 'package:challenger/screens/user/profile/components/occurrence_switcher.dart';
 import 'package:challenger/time/occurrences.dart';
 import 'package:direct_select/direct_select.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,7 +27,7 @@ class _AddCardState extends State<AddCard> {
   final descriptionController = TextEditingController();
 
   List<Widget> _buildOccurrenceItems() {
-    return occurrences.map((val) => OccurrenceBuildItem(title: val)).toList();
+    return occurrences.map((val) => OccurrenceSwitcher(title: val)).toList();
   }
 
   int occurrencesIndex = 0;
@@ -107,7 +108,7 @@ class _AddCardState extends State<AddCard> {
                   DirectSelect(
                       itemExtent: 40.0,
                       selectedIndex: occurrencesIndex,
-                      child: OccurrenceBuildItem(
+                      child: OccurrenceSwitcher(
                         isForList: false,
                         title: occurrences[occurrencesIndex],
                       ),
@@ -185,52 +186,6 @@ class _AddCardState extends State<AddCard> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class OccurrenceBuildItem extends StatelessWidget {
-  final String title;
-  final bool isForList;
-
-  const OccurrenceBuildItem({Key key, this.title, this.isForList = true})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 35.0,
-      child: isForList
-          ? Padding(
-              child: _buildItem(context, MediaQuery.of(context).size.width),
-              padding: EdgeInsets.all(10.0),
-            )
-          : Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Stack(
-                alignment: Alignment.centerLeft,
-                children: <Widget>[
-                  _buildItem(context, MediaQuery.of(context).size.width),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(Icons.arrow_drop_down),
-                  )
-                ],
-              ),
-            ),
-    );
-  }
-
-  _buildItem(BuildContext context, double width) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 0, top: 0, right: 0, bottom: 0),
-      child: Container(
-        width: width,
-        alignment: Alignment.center,
-        child: Text(title),
       ),
     );
   }

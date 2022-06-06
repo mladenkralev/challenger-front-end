@@ -14,6 +14,16 @@ class ChallengeService {
     "username": "test",
     "createdByUserChallenges": [
         {
+            "id": 3,
+            "title": "You are a MACHINE!",
+            "description": "Train every day for at least 20 minutes",
+            "occurrences": "WEEK",
+            "badges": [],
+            "startDate": "2022-01-05",
+            "endDate": "2022-01-31",
+            "numberOfProgressHits": 0.0
+        },
+        {
             "id": 2,
             "title": "You are a MACHINE!",
             "description": "Train every day for at least 20 minutes",
@@ -35,6 +45,16 @@ class ChallengeService {
         }
     ],
     "assignedToUserChallenges": [
+        {
+            "id": 3,
+            "title": "You are a MACHINE!",
+            "description": "Train every day for at least 20 minutes",
+            "occurrences": "WEEK",
+            "badges": [],
+            "startDate": "2022-01-05",
+            "endDate": "2022-01-31",
+            "numberOfProgressHits": 0.0
+        },
         {
             "id": 2,
             "title": "You are a MACHINE!",

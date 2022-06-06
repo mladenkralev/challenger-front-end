@@ -1,12 +1,18 @@
+import 'dart:developer';
+
 import 'package:challenger/challenges/challenge.dart';
 import 'package:challenger/configuration.dart';
 import 'package:challenger/global_constants.dart';
 import 'package:challenger/screens/shared/challenge_card.dart';
+import 'package:challenger/screens/user/profile/components/occurrence_switcher.dart';
 import 'package:challenger/services/challenge_service.dart';
 import 'package:challenger/services/login_service.dart';
 import 'package:challenger/services/user_manager.dart';
+import 'package:direct_select/direct_select.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+
+import '../../../../time/occurrences.dart';
 
 class UserHome extends StatefulWidget {
   final UserManager userManager;
@@ -22,10 +28,34 @@ class UserHome extends StatefulWidget {
 class _UserHomeState extends State<UserHome> {
   final List<GlobalKey<ChallengeCardState>> _keys = List.empty(growable: true);
 
-  String message = "Your challenges";
+  String challengePrefixMessage = "Your ";
+  String challengePostfixMessage = " challenges progress";
   final double backgroundPictureHeight = 150;
 
-  List<ChallengeCard> items = [];
+  Occurrences currentlyDisplayed = Occurrences.DAY;
+
+  int occurrencesIndex = 0;
+  var listView;
+
+  final occurrences = [
+    Occurrences.DAY,
+    Occurrences.WEEK,
+    Occurrences.MONTH
+  ];
+
+  List<Challenge> shownChallenges = List.empty(growable: true);
+  List<ChallengeCard> shownCards = List.empty(growable: true);
+  Map<Occurrences, List<Challenge>> allChallenges = {};
+
+  @override
+  void initState() {
+    allChallenges.putIfAbsent(Occurrences.DAY, () =>  widget.userManager.getDailyAssignChallenges());
+    allChallenges.putIfAbsent(Occurrences.WEEK, () => widget.userManager.getWeeklyAssignChallenges());
+    allChallenges.putIfAbsent(Occurrences.MONTH, () =>   widget.userManager.getMonthlyAssignChallenges());
+    log("allChallenges[Occurrences.DAY] is " +  allChallenges[Occurrences.DAY].toString());
+    shownChallenges.clear();
+    shownChallenges.addAll(allChallenges[Occurrences.DAY]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,40 +73,117 @@ class _UserHomeState extends State<UserHome> {
   }
 
   Widget _getChallenges() {
+    listView = _buildViewableList();
     return Container(
       child: Column(
         children: [
           Container(
             padding: EdgeInsets.only(left: 16,top: 16, bottom: 16),
             alignment: Alignment.topLeft,
-            child: Text(
-              "Your challenges progress",
-              style: TextStyle(
-                fontSize: 18
-              ),
-            )
+              child: _challengeMessage()
           ),
-          ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemCount:  widget.userManager.getAssignChallenges().length,
-            itemBuilder: (context,index){
-
-              final Challenge challenge =  widget.userManager.getAssignChallenges()[index];
-              GlobalKey<ChallengeCardState> cardKey = GlobalKey();
-              _keys.add(cardKey);
-              return  Slidable(
-                  endActionPane: ActionPane(
-                    motion: const ScrollMotion(),
-                    children: [
-                      CardCustomSlidableAction(cardKey: cardKey, challenge: challenge, userManager: widget.userManager, index: index),
-                    ],
-                  ),
-
-                  child: new ChallengeCard(cardKey, challenge)
-              );
-            })],
+          listView
+        ],
       ),
+    );
+  }
+
+  Widget _buildViewableList() {
+    return ListView.builder(
+        physics: NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount:  shownChallenges.length,
+        itemBuilder: (context, index) {
+          final Challenge challenge =  shownChallenges[index];
+          return _getSlidableCustomChallengeCard(challenge, index);
+        });
+  }
+
+  changeDisplayedChallenges(Occurrences selectedOccurrenceType) {
+    setState(() {
+      currentlyDisplayed = selectedOccurrenceType;
+      switch (selectedOccurrenceType) {
+        case Occurrences.DAY:
+          shownChallenges.clear();
+          shownCards.clear();
+          _keys.clear();
+          log("allChallenges[Occurrences.DAY] is " +  allChallenges[Occurrences.DAY].toString());
+          shownChallenges.addAll(allChallenges[Occurrences.DAY]);
+          listView = _buildViewableList();
+          break;
+        case Occurrences.WEEK:
+          shownChallenges.clear();
+          shownCards.clear();
+          shownChallenges.addAll(allChallenges[Occurrences.WEEK]);
+          setState(() {
+            listView = _buildViewableList();
+          });
+          break;
+        case Occurrences.MONTH:
+          shownChallenges.clear();
+          shownCards.clear();
+          shownChallenges.addAll(allChallenges[Occurrences.MONTH]);
+          setState(() {
+            listView = _buildViewableList();
+          });
+          break;
+      }
+    });
+  }
+
+  Widget _challengeMessage() {
+    return Row(
+      children: [
+        Text(
+          challengePrefixMessage,
+          style: TextStyle(
+              fontSize: 18
+          ),
+        ),
+        DirectSelect(
+            itemExtent: 40.0,
+            selectedIndex: occurrencesIndex,
+            child: OccurrenceSwitcher(
+              isForList: false,
+              title: OccurrencesTransformer.transformToString(occurrences[occurrencesIndex]),
+            ),
+            onSelectedItemChanged: (index) {
+              setState(() {
+                occurrencesIndex = index;
+                changeDisplayedChallenges(occurrences[index]);
+              });
+            },
+            items: occurrences.map(
+                    (val) => OccurrenceSwitcher(title: OccurrencesTransformer.transformToString(val))).toList()
+        ),
+        Text(
+          challengePostfixMessage,
+          style: TextStyle(
+              fontSize: 18
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _getSlidableCustomChallengeCard(Challenge challenge, int index) {
+    // add key for updating
+    GlobalKey<ChallengeCardState> cardKey = GlobalKey();
+    _keys.add(cardKey);
+
+    // remember the card for clear and adding again
+    ChallengeCard challengeCard = new ChallengeCard(cardKey, challenge);
+    shownCards.add(challengeCard);
+
+    // wrap with slidable
+    return Slidable(
+        endActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          children: [
+            CardCustomSlidableAction(cardKey: cardKey, challenge: challenge, userManager: widget.userManager, index: index),
+          ],
+        ),
+        child: challengeCard
     );
   }
 
@@ -110,6 +217,12 @@ class _UserHomeState extends State<UserHome> {
 }
 
 class CardCustomSlidableAction extends StatefulWidget {
+  final occurrences = [
+    OccurrencesTransformer.transformToString(Occurrences.DAY),
+    OccurrencesTransformer.transformToString(Occurrences.WEEK),
+    OccurrencesTransformer.transformToString(Occurrences.MONTH)
+  ];
+
   final UserManager userManager;
 
   int index;
@@ -150,6 +263,8 @@ class _CardCustonSlidableActionState extends State<CardCustomSlidableAction> {
       ),
     );
   }
+
+
 }
 
 

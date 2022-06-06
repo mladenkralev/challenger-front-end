@@ -88,26 +88,5 @@ class UserHomePageState extends State<UserHomePage> {
     });
   }
 
-  changeDisplayedChallenges(Occurrences selectedOccurrenceType) {
-    setState(() async {
-      // currentlyDisplayed = selectedOccurrenceType;
-      // switch (selectedOccurrenceType) {
-      //   case Occurrences.DAY:
-      //     currentlyDisplayedChallenges.clear();
-      //     currentlyDisplayedChallenges =
-      //         await widget.user.manager.getDailyChallenges();
-      //     break;
-      //   case Occurrences.WEEK:
-      //     currentlyDisplayedChallenges.clear();
-      //     currentlyDisplayedChallenges =
-      //         await widget.user.manager.getWeeklyChallenges();
-      //     break;
-      //   case Occurrences.MONTH:
-      //     currentlyDisplayedChallenges.clear();
-      //     currentlyDisplayedChallenges =
-      //         await widget.user.manager.getMonthlyChallenges();
-      //     break;
-      // }
-    });
-  }
+
 }

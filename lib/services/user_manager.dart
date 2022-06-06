@@ -39,7 +39,7 @@ class UserManager {
   }
 
   List<Challenge> getWeeklyAssignChallenges()  {
-    return user.challengeManager.getMonthlyChallenges(ASSIGNED_CHALLENGES);
+    return user.challengeManager.getWeeklyChallenges(ASSIGNED_CHALLENGES);
   }
 
   List<Challenge> getMonthlyAssignChallenges()  {

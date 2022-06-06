@@ -23,6 +23,9 @@ class ChallengerFactory {
     List<Challenge> list = _cache[nameOfChallenges]
         .where((element) => element.occurrences == Occurrences.DAY)
         .toList();
+    if(list.isEmpty) {
+      return List.empty(growable: true);
+    }
     return list;
   }
 
@@ -30,6 +33,9 @@ class ChallengerFactory {
     List<Challenge> list = _cache[nameOfChallenges]
         .where((element) => element.occurrences == Occurrences.WEEK)
         .toList();
+    if(list.isEmpty) {
+      return List.empty(growable: true);
+    }
     return list;
   }
 
@@ -37,6 +43,9 @@ class ChallengerFactory {
     List<Challenge> list = _cache[nameOfChallenges]
         .where((element) => element.occurrences == Occurrences.MONTH)
         .toList();
+    if(list.isEmpty) {
+      return List.empty(growable: true);
+    }
     return list;
   }
 
