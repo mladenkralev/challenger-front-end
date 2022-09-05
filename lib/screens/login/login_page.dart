@@ -3,6 +3,8 @@ import 'package:challenger/services/login_service.dart';
 import 'package:challenger/services/user_manager.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/asset_service.dart';
+
 class LoginPage extends StatefulWidget {
   final UserManager userManager;
 
@@ -73,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
           height: double.maxFinite,
           decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage("assets/home_image_1.jpg"),
+                image: AssetImage("assets/chrome_login_wallpaper.jpg"),
                 fit: BoxFit.cover
             )
           ),

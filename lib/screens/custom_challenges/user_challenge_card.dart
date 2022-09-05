@@ -46,10 +46,10 @@ class _ChallengeCardState extends State<UserChallengeCard> {
               ),
               ButtonBar(
                 children: <Widget>[
-                  FlatButton(
+                  TextButton(
                     child: const Text("Abandon"),
                     onPressed: () {
-                      Scaffold.of(context).showSnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text('Challenge was abandoned'),
                               duration: Duration(seconds: 2)

@@ -156,16 +156,16 @@ class _AddCardState extends State<AddCard> {
                   ),
                   ButtonBar(
                     children: <Widget>[
-                      FlatButton(
+                      TextButton(
                         child: const Text("Decline"),
                         onPressed: () {},
                       ),
-                      FlatButton(
+                      TextButton(
                         child: const Text("Accept"),
                         onPressed: () {
                           NotificationManager.instance(context)
                               .showNotification();
-                          Scaffold.of(context).showSnackBar(
+                          ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Processing Data')));
                           widget.notifyParent(new Challenge(
                               null,
@@ -175,7 +175,8 @@ class _AddCardState extends State<AddCard> {
                                   occurrences[occurrencesIndex]),
                               null,
                               null,
-                              100));
+                              100,
+                              null));
                           Navigator.pop(context);
                         },
                       ),

@@ -1,6 +1,6 @@
 import 'package:challenger/screens/components/add_page.dart';
 import 'package:challenger/screens/user/profile/components/animated_user_challenge.dart';
-import 'package:challenger/screens/user/profile/components/tabs/profile_tab.dart';
+import 'package:challenger/screens/user/profile/components/profile/profile_tab.dart';
 import 'package:challenger/screens/user/profile/components/user_home.dart';
 import 'package:challenger/time/occurrences.dart';
 import 'package:flutter/material.dart';

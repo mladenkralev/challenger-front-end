@@ -1,8 +1,11 @@
 import 'package:challenger/challenges/challenge.dart';
+import 'package:challenger/services/asset_service.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
+
+import '../../configuration.dart';
 
 
 class ChallengeCard extends StatefulWidget {
@@ -24,6 +27,8 @@ class ChallengeCardState extends State<ChallengeCard> {
   double cardRadius = 20;
 
   double challengeProgress = 0;
+
+  final loginService = locator<AssetService>();
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +71,7 @@ class ChallengeCardState extends State<ChallengeCard> {
             constraints: BoxConstraints.expand(height: 300),
             decoration: new BoxDecoration(
                 image: new DecorationImage(
-                  image: new AssetImage(
-                      'assets/andrew-tanglao-3I2vzcmEpLU-unsplash.jpg'),
+                  image: loginService.getImage(widget.challenge.blob.id),
                   fit: BoxFit.cover,
                 ),
                 borderRadius: BorderRadius.circular(cardRadius)
@@ -112,8 +116,7 @@ class ChallengeCardState extends State<ChallengeCard> {
           constraints: BoxConstraints.expand(height: 300),
           decoration: new BoxDecoration(
               image: new DecorationImage(
-                image: new AssetImage(
-                    'assets/andrew-tanglao-3I2vzcmEpLU-unsplash.jpg'),
+                image: loginService.getImage(widget.challenge.blob.id),
                 fit: BoxFit.cover,
               ),
               borderRadius: BorderRadius.circular(cardRadius)

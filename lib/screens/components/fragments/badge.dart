@@ -7,7 +7,7 @@ class VerbBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Scaffold.of(context)
+        ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('something was clicked')));
       },
       onLongPress: () {

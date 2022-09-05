@@ -11,8 +11,10 @@ class Challenge {
   DateTime finalDate;
 
   double numberOfProgressHits;
+  NetworkBlob blob;
 
-  Challenge(int id, String title, String description, Occurrences occurrences, DateTime startDate, DateTime endDate, double numberOfProgressHits) {
+  Challenge(int id, String title, String description, Occurrences occurrences,
+      DateTime startDate, DateTime endDate, double numberOfProgressHits, NetworkBlob blob) {
     this.id = id;
     this.title = title;
     this.description = description;
@@ -20,6 +22,7 @@ class Challenge {
     this.startDate = startDate;
     this.finalDate = endDate;
     this.numberOfProgressHits = numberOfProgressHits;
+    this.blob = blob;
   }
 
   factory Challenge.fromJson(Map<String, dynamic> json) {
@@ -30,7 +33,9 @@ class Challenge {
         json['occurrences'],
         json['startDate'],
         json['endDate'],
-        json['numberOfProgressHits']);
+        json['numberOfProgressHits'],
+        json['streamingFileRecord']
+    );
   }
 
   static List<Challenge> fromList(List<dynamic> json) {
@@ -43,10 +48,16 @@ class Challenge {
                 OccurrencesTransformer.getEnumOccurrences(element['occurrences']),
                 parseDate(element['startDate']),
                 parseDate(element['endDate']),
-                element['numberOfProgressHits']);
+                element['numberOfProgressHits'],
+                getNetworkBlob(element['streamingFileRecord'])
+      );
       challenges.add(challenge);
     });
     return challenges;
+  }
+
+  static NetworkBlob getNetworkBlob(dynamic json) {
+   return NetworkBlob(json['id'], json['name'], json['gcsPath']);
   }
 
   static DateTime parseDate(String date) {
@@ -79,4 +90,24 @@ class Challenge {
       occurrences.hashCode ^
       startDate.hashCode ^
       finalDate.hashCode;
+}
+
+class NetworkBlob {
+  int id;
+  String name;
+  String gcsPath;
+
+  NetworkBlob(int id, String name, String gcsPath) {
+    this.id = id;
+    this.name = name;
+    this.gcsPath = gcsPath;
+  }
+
+  factory NetworkBlob.fromJson(Map<String, dynamic> json) {
+    return NetworkBlob(
+        json['id'],
+        json['name'],
+        json['gcsPath'],
+    );
+  }
 }

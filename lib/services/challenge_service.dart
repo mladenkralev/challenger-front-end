@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:challenger/challenges/challenge.dart';
 import 'package:challenger/configuration.dart';
@@ -83,7 +84,8 @@ class ChallengeService {
 
   final userManager = locator<UserManager>();
 
-  static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
+  // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
+  static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
 
   Future<User> upgradeProgressOfChallenge(UserManager userManager, int challengeIndex) async {
     var assignChallenge = userManager.getAssignChallenges()[challengeIndex];
@@ -103,7 +105,11 @@ class ChallengeService {
   }
 
   Future<User> getUserChallenges(String token) async {
-    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/users');
+    String userDataUrl = BACKEND_AUTH_SERVICE + '/api/v1/users';
+
+    log('Getting user data from ' + userDataUrl);
+
+    var usersUrl = Uri.parse(userDataUrl);
 
     final userResponse = await http.get(usersUrl,
       headers: <String, String> {

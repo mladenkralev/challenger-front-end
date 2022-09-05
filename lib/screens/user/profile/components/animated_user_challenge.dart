@@ -30,7 +30,7 @@ class _AnimatedUserChallengeState extends State<AnimatedUserChallenge> {
           onDismissed: (direction) {
             widget.notifyParent.call(widget.index);
 
-            Scaffold.of(context)
+            ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text("$widget dismissed with $direction")));
           },
           // Show a red background as the item is swiped away.

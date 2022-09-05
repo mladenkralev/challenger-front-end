@@ -1,3 +1,4 @@
+import 'package:challenger/services/asset_service.dart';
 import 'package:challenger/services/challenge_service.dart';
 import 'package:challenger/services/login_service.dart';
 import 'package:challenger/services/user_manager.dart';
@@ -11,4 +12,5 @@ void configureDependencies() {
   locator.registerLazySingleton<LoginService>(() => LoginService());
   locator.registerLazySingleton<ChallengeService>(() => ChallengeService());
   locator.registerLazySingleton<UserManager>(() => UserManager());
+  locator.registerLazySingleton<AssetService>(() => AssetService());
 }
