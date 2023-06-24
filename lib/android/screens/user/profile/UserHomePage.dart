@@ -22,7 +22,7 @@ class UserHomePageState extends State<UserHomePage> {
   int _selectedIndex = 0;
   Occurrences currentlyDisplayed = Occurrences.DAY;
 
-  UserHomeBody body;
+  UserHomeBody? body;
 
   @override
   void initState() {
@@ -47,7 +47,7 @@ class UserHomePageState extends State<UserHomePage> {
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       body: Container(
-        child: body.widgetOptions.elementAt(_selectedIndex),
+        child: body!.widgetOptions?.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[

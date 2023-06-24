@@ -5,7 +5,7 @@ class OccurrenceSwitcher extends StatelessWidget {
   final String title;
   final bool isForList;
 
-  const OccurrenceSwitcher({Key key, this.title, this.isForList = true})
+  const OccurrenceSwitcher({required Key key, required this.title, this.isForList = true})
       : super(key: key);
 
   @override

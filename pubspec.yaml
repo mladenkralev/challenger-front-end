@@ -18,31 +18,32 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ">=2.16.1 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^4.3.2+1
-  cupertino_icons: ^0.1.3
-  fluttertoast: ^7.0.4
-  unicorndial: ^1.1.5
-  direct_select: ^1.0.0
-  badges: ^1.1.3
-  auto_size_text_field: ^0.1.5
-  flutter_local_notifications: ^1.4.2
-  rxdart: ^0.23.1
-  fl_chart: ^0.12.1
-  http: ^0.13.4
-  neat_periodic_task: ^2.0.0
-  intl: ^0.16.1
-  percent_indicator: ^3.4.0
-  injectable: ^1.5.3
-  get_it: ^7.2.0
-  build_runner: ^2.1.7
+  cupertino_icons: ^1.0.5
+  provider: ^6.0.5
+  fluttertoast: ^8.2.2
+  direct_select: ^2.0.0
+  badges: ^3.1.1
+  auto_size_text_field: ^2.2.1
+  flutter_local_notifications: ^14.1.1
+  rxdart: ^0.27.7
+  http: ^1.0.0
+  neat_periodic_task: ^2.0.1
+  intl: ^0.18.1
+  percent_indicator: ^4.2.3
+  injectable: ^2.1.2
+  get_it: ^7.6.0
+  build_runner: ^2.4.5
   expandable: ^5.0.1
-  flutter_slidable: ^1.2.0
-  dio: ^4.0.6
+  flutter_slidable: ^3.0.0
+  dio: ^5.2.1
+  data_table_2: ^2.5.2
+  google_fonts: ^5.0.0
+  get: ^4.6.5
 
 dev_dependencies:
   flutter_test:

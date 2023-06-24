@@ -2,26 +2,17 @@ import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 import 'package:intl/intl.dart';
 
 class ChallengeModel {
-  int id;
-  String title;
-  String description;
+  int? id;
+  String? title;
+  String? description;
+  Occurrences? occurrences;
+  NetworkBlob? blob;
 
-  Occurrences occurrences;
-  DateTime startDate;
-  DateTime finalDate;
-
-  double numberOfProgressHits;
-  NetworkBlob blob;
-
-  ChallengeModel(int id, String title, String description, Occurrences occurrences,
-      DateTime startDate, DateTime endDate, double numberOfProgressHits, NetworkBlob blob) {
+  ChallengeModel(int id, String title, String description, Occurrences occurrences, NetworkBlob blob) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.occurrences = occurrences;
-    this.startDate = startDate;
-    this.finalDate = endDate;
-    this.numberOfProgressHits = numberOfProgressHits;
     this.blob = blob;
   }
 
@@ -30,11 +21,8 @@ class ChallengeModel {
         json['id'],
         json['title'],
         json['description'],
-        json['occurrences'],
-        json['startDate'],
-        json['endDate'],
-        json['numberOfProgressHits'],
-        json['streamingFileRecord']
+        OccurrencesTransformer.getEnumOccurrences(json['occurrences']),
+        getNetworkBlob(json['streamingFileRecord'])
     );
   }
 
@@ -46,9 +34,6 @@ class ChallengeModel {
                 element['title'],
                 element['description'],
                 OccurrencesTransformer.getEnumOccurrences(element['occurrences']),
-                parseDate(element['startDate']),
-                parseDate(element['endDate']),
-                element['numberOfProgressHits'],
                 getNetworkBlob(element['streamingFileRecord'])
       );
       challenges.add(challenge);
@@ -57,18 +42,9 @@ class ChallengeModel {
   }
 
   static NetworkBlob getNetworkBlob(dynamic json) {
-   return NetworkBlob(json['id'], json['name'], json['gcsPath']);
+   return NetworkBlob(json['id'], json['name'], json['gcspath']);
   }
 
-  static DateTime parseDate(String date) {
-    DateFormat format = DateFormat("yyyy-MM-dd");
-    return format.parse(date);
-  }
-
-  @override
-  String toString() {
-    return 'Challenge{id: $id, text: $title}';
-  }
 
   @override
   bool operator ==(Object other) =>
@@ -78,24 +54,25 @@ class ChallengeModel {
           id == other.id &&
           title == other.title &&
           description == other.description &&
-          occurrences == other.occurrences &&
-          startDate == other.startDate &&
-          finalDate == other.finalDate;
+          occurrences == other.occurrences;
 
   @override
   int get hashCode =>
       id.hashCode ^
       title.hashCode ^
       description.hashCode ^
-      occurrences.hashCode ^
-      startDate.hashCode ^
-      finalDate.hashCode;
+      occurrences.hashCode;
+
+  @override
+  String toString() {
+    return 'ChallengeModel{id: $id, title: $title, description: $description, occurrences: $occurrences';
+  }
 }
 
 class NetworkBlob {
-  int id;
-  String name;
-  String gcsPath;
+  int? id;
+  String? name;
+  String? gcsPath;
 
   NetworkBlob(int id, String name, String gcsPath) {
     this.id = id;

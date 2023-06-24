@@ -87,11 +87,13 @@ class ChallengeService {
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
 
   Future<User> upgradeProgressOfChallenge(UserManager userManager, int challengeIndex) async {
-    var assignChallenge = userManager.getAssignChallenges()[challengeIndex];
-    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/challenges/' + assignChallenge.id.toString() + "/progress");
-    var token = userManager.user.token;
+    print("Updating progress of challenge with id" + challengeIndex.toString());
+    
+    var assignChallenge = userManager.getAssignChallenges()?[challengeIndex];
+    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/challenges/' + assignChallenge!.id.toString() + "/progress");
+    var token = userManager.user?.token;
 
-    print("Pressed" + usersUrl.toString());
+    print("Pressed " + usersUrl.toString());
 
     final userResponse = await http.post(usersUrl,
       headers: <String, String> {
@@ -100,7 +102,7 @@ class ChallengeService {
     );
 
     print("Response from progress update" + userResponse.statusCode.toString());
-    return getUserChallenges(token);
+    return getUserChallenges(token!);
   }
 
   Future<User> getUserChallenges(String token) async {
@@ -117,8 +119,8 @@ class ChallengeService {
     );
 
     Map<String, dynamic> userData = jsonDecode(userResponse.body);
-    User user = User.fromJson(userData, token);
-    print(user.challengeManager.getChallenges("assignedToUserChallenges"));
+    User user = new User(userData, token);
+    print(user.challengeManager?.getChallenges("assignedToUserChallenges"));
     userManager.attachUser(user);
 
     return user;
@@ -128,8 +130,8 @@ class ChallengeService {
   Future<User> getDummyChallenges(String token) async {
 
     Map<String, dynamic> userData = jsonDecode(jsonString);
-    User user = User.fromJson(userData, token);
-    print(user.challengeManager.getChallenges("assignedToUserChallenges"));
+    User user = new User(userData, token);
+    print(user.challengeManager?.getChallenges("assignedToUserChallenges"));
     userManager.attachUser(user);
 
     return user;

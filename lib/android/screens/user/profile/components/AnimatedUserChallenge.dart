@@ -15,14 +15,14 @@ class AnimatedUserChallenge extends StatefulWidget {
 
 class _AnimatedUserChallengeState extends State<AnimatedUserChallenge> {
   bool selected = false;
-  BuildContext context;
+  late BuildContext context;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         setState(() {
-          selected = !selected;
+          selected = !selected!;
         });
       },
       child: Dismissible(
@@ -47,10 +47,9 @@ class _AnimatedUserChallengeState extends State<AnimatedUserChallenge> {
                 child: Column(
                   children: [
                     ListTile(
-                        title: Text(widget.currentChallenge.title),
-                        subtitle: Text(widget.currentChallenge.description)
+                        title: Text(widget.currentChallenge.title!),
+                        subtitle: Text(widget.currentChallenge.description!)
                     ),
-
                   ],
                 ),
               ),

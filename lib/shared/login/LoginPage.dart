@@ -1,10 +1,7 @@
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/android/screens/user/profile/UserHomePage.dart';
 import 'package:challenger/shared/model/UserManager.dart';
 import 'package:challenger/shared/services/LoginService.dart';
-import 'package:challenger/web/profile/UserHomeWeb.dart';
 import 'package:flutter/material.dart';
-
 
 class LoginPage extends StatefulWidget {
   final UserManager userManager;
@@ -28,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   String _password = "";
   FormType _form = FormType.login;
 
-  UserManager userManager;
+  UserManager? userManager;
 
   final loginService = locator<LoginService>();
 
@@ -69,34 +66,31 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        // appBar: _buildBar(context),
-        body: new Container(
-          width: double.maxFinite,
-          height: double.maxFinite,
-          decoration: BoxDecoration(
+      // appBar: _buildBar(context),
+      body: new Container(
+        width: double.maxFinite,
+        height: double.maxFinite,
+        decoration: BoxDecoration(
             image: DecorationImage(
                 image: AssetImage(backgroundAssetLocalPath),
-                fit: BoxFit.cover
-            )
-          ),
-          child: Container(
-            padding: EdgeInsets.all(20.0),
-            child: new Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                _buildTextFields(),
-                _buildButtons(),
-              ],
-            ),
+                fit: BoxFit.cover)),
+        child: Container(
+          padding: EdgeInsets.all(20.0),
+          child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              _buildTextFields(),
+              _buildButtons(),
+            ],
           ),
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildBar(BuildContext context) {
-    return new AppBar(
-    );
+    return new AppBar();
   }
 
   Widget _buildTextFields() {
@@ -109,16 +103,15 @@ class _LoginPageState extends State<LoginPage> {
               controller: _emailFilter,
               decoration: new InputDecoration(
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                   ),
                   labelText: 'Email',
-                  labelStyle: TextStyle(
-                      color: Theme.of(context).primaryColor
-                  )
-              ),
+                  labelStyle: TextStyle(color: Theme.of(context).primaryColor)),
             ),
           ),
           new Container(
@@ -127,16 +120,15 @@ class _LoginPageState extends State<LoginPage> {
               controller: _passwordFilter,
               decoration: new InputDecoration(
                   enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                   ),
                   focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
                   ),
                   labelText: 'Password',
-                  labelStyle: TextStyle(
-                      color: Theme.of(context).primaryColor
-                  )
-              ),
+                  labelStyle: TextStyle(color: Theme.of(context).primaryColor)),
               obscureText: true,
             ),
           )
@@ -155,13 +147,10 @@ class _LoginPageState extends State<LoginPage> {
               width: double.maxFinite,
               child: new ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    primary: Theme.of(context).primaryColor
-                ),
+                    primary: Theme.of(context).primaryColor),
                 child: new Text(
                   'Login',
-                  style: TextStyle(
-                      color: Colors.black
-                  ),
+                  style: TextStyle(color: Colors.black),
                 ),
                 onPressed: _loginPressed,
               ),
@@ -169,19 +158,16 @@ class _LoginPageState extends State<LoginPage> {
             new TextButton(
               child: new Text(
                 "Don't have an account? Tap here to register.",
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.secondary
-                ),
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: _formChange,
             ),
             new TextButton(
               child: new Text(
                 'Forgot Password?',
-                style: TextStyle(
-                    color: Theme.of(context).colorScheme.secondary
-                ),
-
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: _passwordReset,
             )
@@ -197,13 +183,10 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.only(top: 20),
               child: new ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    primary: Theme.of(context).colorScheme.primary
-                ),
+                    primary: Theme.of(context).colorScheme.primary),
                 child: new Text(
                   'Create an Account',
-                   style: TextStyle(
-                    color: Colors.black
-                  ),
+                  style: TextStyle(color: Colors.black),
                 ),
                 onPressed: _createAccountPressed,
               ),
@@ -211,9 +194,8 @@ class _LoginPageState extends State<LoginPage> {
             new TextButton(
               child: new Text(
                 'Have an account? Click here to login.',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondary
-                ),
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
               onPressed: _formChange,
             )
@@ -227,7 +209,8 @@ class _LoginPageState extends State<LoginPage> {
 
   void _loginPressed() {
     // loginService.loginAndSwitchToUserScreen(userManager, _email, _password, context);
-    loginService.loginAndSwitchToUserScreen(userManager, "test@abv.bg", "test", context);
+    loginService.loginAndSwitchToUserScreen(
+        userManager!, "test@abv.bg", "test", context);
   }
 
   void _createAccountPressed() {

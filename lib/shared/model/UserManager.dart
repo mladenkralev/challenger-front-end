@@ -1,9 +1,10 @@
 import 'package:challenger/shared/model/ChallengeModel.dart';
 
+import 'AssignedChallenges.dart';
 import 'UserModel.dart';
 
 class UserManager {
-  User user;
+  User? user;
 
   static const String ASSIGNED_CHALLENGES = "assignedToUserChallenges";
   static const String CREATED_CHALLENGES = "createdByUserChallenges";
@@ -13,41 +14,41 @@ class UserManager {
     return this;
   }
 
-  assignChallenge(ChallengeModel challenge) {
-    user.challengeManager.assignChallenge(challenge);
+  assignChallenge(AssignedChallenges challenge) {
+    user?.challengeManager?.assignChallenge(challenge);
   }
 
-  abandonChallenge(ChallengeModel challenge) {
-    user.challengeManager.abandonChallenge(ASSIGNED_CHALLENGES, challenge);
+  abandonChallenge(AssignedChallenges challenge) {
+    user?.challengeManager?.abandonChallenge(ASSIGNED_CHALLENGES, challenge);
   }
 
-  List<ChallengeModel> getAssignChallenges() {
-    return user.challengeManager.getChallenges(ASSIGNED_CHALLENGES);
+  List<AssignedChallenges>? getAssignChallenges() {
+    return user?.challengeManager?.getChallenges(ASSIGNED_CHALLENGES);
   }
 
-  List<ChallengeModel> getCompletedChallenges() {
-    return user.challengeManager.getChallenges(ASSIGNED_CHALLENGES);
+  List<AssignedChallenges>? getCompletedChallenges() {
+    return user?.challengeManager?.getChallenges(ASSIGNED_CHALLENGES);
   }
 
-  List<ChallengeModel> getDailyAssignChallenges() {
-    return user.challengeManager.getDailyChallenges(ASSIGNED_CHALLENGES);
+  List<AssignedChallenges>? getDailyAssignChallenges() {
+    return user?.challengeManager?.getDailyChallenges(ASSIGNED_CHALLENGES);
   }
 
-  List<ChallengeModel> getWeeklyAssignChallenges() {
-    return user.challengeManager.getWeeklyChallenges(ASSIGNED_CHALLENGES);
+  List<AssignedChallenges>? getWeeklyAssignChallenges() {
+    return user?.challengeManager?.getWeeklyChallenges(ASSIGNED_CHALLENGES);
   }
 
-  List<ChallengeModel> getMonthlyAssignChallenges() {
-    return user.challengeManager.getMonthlyChallenges(ASSIGNED_CHALLENGES);
+  List<AssignedChallenges>? getMonthlyAssignChallenges() {
+    return user?.challengeManager?.getMonthlyChallenges(ASSIGNED_CHALLENGES);
   }
 
-  User get hasUser => user ?? null;
+  User? get hasUser => user ?? null;
 
-  int get level => user.level;
+  int? get level => user?.level;
 
-  String get email => user.email;
+  String? get email => user?.email;
 
-  String get username => user.username;
+  String? get username => user?.username;
 
-  String get title => user.title;
+  String? get title => user?.title;
 }

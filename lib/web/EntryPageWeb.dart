@@ -3,6 +3,8 @@ import 'package:challenger/shared/model/UserManager.dart';
 import 'package:challenger/web/WebGlobalConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../DependencyInjection.dart';
 import 'profile/UserHomeWeb.dart';
@@ -26,19 +28,31 @@ class _EntryPageWebState extends State<EntryPageWeb> {
   @override
   Widget build(BuildContext context) {
     // return UserHomePage(new User());
-    return MaterialApp(
+    return GetMaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primaryColor: WebGlobalConstants.primaryColor,
-          colorScheme: WebGlobalConstants.secondColor,
-          backgroundColor: WebGlobalConstants.backgroundColor,
-          textTheme: const TextTheme(
-            headline1: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            headline2: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-          ),
+            primaryColor: WebGlobalConstants.primaryColor,
+            colorScheme: WebGlobalConstants.secondColor,
+            backgroundColor: WebGlobalConstants.backgroundColor,
+            textTheme: GoogleFonts.mulishTextTheme().apply(
+                bodyColor: Colors.black
+            ),
+            pageTransitionsTheme: PageTransitionsTheme(
+                builders: {
+                  TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+                  TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+                  TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+                }
+            )
+
         ),
-        home: userManager.hasUser == null ? LoginPage(userManager) : UserHomeWeb(userManager)
+        home: userManager.hasUser == null
+    ? LoginPage(userManager): UserHomeWeb(userManager)
+    ,
+    // textTheme: const TextTheme(
+    //     headline1: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    //     headline2: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
+    // ),
     );
   }
-
-
 }

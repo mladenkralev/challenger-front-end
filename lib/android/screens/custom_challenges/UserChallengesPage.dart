@@ -1,4 +1,5 @@
 import 'package:challenger/android/screens/custom_challenges/UserChallengeCard.dart';
+import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/model/UserManager.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,7 +34,7 @@ class _UserChallengesPageState extends State<UserChallengesPage> {
     });
   }
 
-  Widget getChallenges(List<ChallengeModel> snapshot) {
+  Widget getChallenges(List<AssignedChallenges> snapshot) {
     return snapshot.length == 0
         ? SizedBox(
             child: Card(

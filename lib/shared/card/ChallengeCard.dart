@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../DependencyInjection.dart';
+import '../model/AssignedChallenges.dart';
 
 
 class ChallengeCard extends StatefulWidget {
   bool isExpanded = false;
-  final ChallengeModel challenge;
+  final AssignedChallenges challenge;
 
   double collapsedHeight;
 
@@ -20,17 +21,19 @@ class ChallengeCard extends StatefulWidget {
 }
 
 class ChallengeCardState extends State<ChallengeCard> {
+  bool runOnce = false;
+
   bool collapsed = true;
 
   double cardRadius = 20;
 
   double challengeProgress = 0;
+  double pace = 0;
 
   final loginService = locator<AssetService>();
 
   @override
   Widget build(BuildContext context) {
-    challengeProgress = widget.challenge.numberOfProgressHits / 100;
 
     return GestureDetector(
         onTap: () {
@@ -53,12 +56,18 @@ class ChallengeCardState extends State<ChallengeCard> {
               //     .topStart,
               duration: const Duration(seconds: 2),
               curve: Curves.fastOutSlowIn,
-              child: collapsed ? _collapsedChild() : ExpandedCard(widget.key, widget.challenge)
+              child: collapsed ? _collapsedChild() : ExpandedCard(widget.challenge)
           ),
         ));
   }
 
   Widget _collapsedChild() {
+    if(!runOnce) {
+      pace = 100/ widget.challenge.maxProgress!;
+      challengeProgress = pace * (widget.challenge.maxProgress! - widget.challenge.currentProgress!);
+      updateChallengeProgress(challengeProgress);
+      runOnce = true;
+    }
     // center it if you want
     return Card(
       shape: RoundedRectangleBorder(
@@ -70,7 +79,7 @@ class ChallengeCardState extends State<ChallengeCard> {
         decoration: new BoxDecoration(
             image: new DecorationImage(
               colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
-              image: loginService.getImage(widget.challenge.blob.id),
+              image: loginService.getImage(widget.challenge.challengeModel?.blob?.id!),
               fit: BoxFit.cover,
             ),
             borderRadius: BorderRadius.circular(cardRadius)
@@ -83,11 +92,11 @@ class ChallengeCardState extends State<ChallengeCard> {
                 leading: new CircularPercentIndicator(
                   radius: 45.0,
                   lineWidth: 4.0,
-                  percent: challengeProgress,
-                  center: new Text(challengeProgress.toString()),
+                  percent: double.parse((challengeProgress).toStringAsFixed(1)),
+                  center: new Text(challengeProgress.toStringAsFixed(1)),
                   progressColor: Colors.red,
                 ),
-                title: Text(widget.challenge.title),
+                title: Text(widget.challenge.challengeModel!.title!),
                 subtitle: Text(
                   'A sufficiently long subtitle warrants three lines.',
                   style: TextStyle(
@@ -104,9 +113,9 @@ class ChallengeCardState extends State<ChallengeCard> {
     );
   }
 
-  updateChallengeProgress(){
+  updateChallengeProgress(double numberOfHits){
     setState(() {
-      challengeProgress = widget.challenge.numberOfProgressHits / 100;
+      challengeProgress = numberOfHits / 100;
       print(challengeProgress);
     });
   }

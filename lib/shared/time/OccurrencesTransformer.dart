@@ -21,6 +21,7 @@ class OccurrencesTransformer {
             .substring(Occurrences.WEEK.toString().indexOf('.') + 1)) {
       return Occurrences.WEEK;
     }
+    return Occurrences.DAY;
   }
 
   static String transformToString(Occurrences occurrences) {
@@ -38,5 +39,6 @@ class OccurrencesTransformer {
       case "MONTH":
         return "monthly";
     }
+    return "DAY";
   }
 }

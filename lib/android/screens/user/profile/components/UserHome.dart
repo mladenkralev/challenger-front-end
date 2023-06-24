@@ -1,5 +1,6 @@
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/card/ChallengeCard.dart';
+import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/model/UserManager.dart';
 import 'package:challenger/shared/services/ChallengeService.dart';
@@ -35,18 +36,18 @@ class _UserHomeState extends State<UserHome> {
     Occurrences.MONTH
   ];
 
-  List<ChallengeModel> shownChallenges = List.empty(growable: true);
+  List<AssignedChallenges> shownChallenges = List.empty(growable: true);
   List<ChallengeCard> shownCards = List.empty(growable: true);
-  Map<Occurrences, List<ChallengeModel>> allChallenges = {};
+  Map<Occurrences, List<AssignedChallenges>> allChallenges = {};
 
   @override
   void initState() {
-    allChallenges.putIfAbsent(Occurrences.DAY, () =>  widget.userManager.getDailyAssignChallenges());
-    allChallenges.putIfAbsent(Occurrences.WEEK, () => widget.userManager.getWeeklyAssignChallenges());
-    allChallenges.putIfAbsent(Occurrences.MONTH, () =>   widget.userManager.getMonthlyAssignChallenges());
+    allChallenges.putIfAbsent(Occurrences.DAY, () =>  widget.userManager.getDailyAssignChallenges()!);
+    allChallenges.putIfAbsent(Occurrences.WEEK, () => widget.userManager.getWeeklyAssignChallenges()!);
+    allChallenges.putIfAbsent(Occurrences.MONTH, () =>   widget.userManager.getMonthlyAssignChallenges()!);
 
     shownChallenges.clear();
-    shownChallenges.addAll(allChallenges[Occurrences.DAY]);
+    shownChallenges.addAll(allChallenges[Occurrences.DAY] as Iterable<AssignedChallenges>);
   }
 
   @override
@@ -86,7 +87,7 @@ class _UserHomeState extends State<UserHome> {
         shrinkWrap: true,
         itemCount:  shownChallenges.length,
         itemBuilder: (context, index) {
-          final ChallengeModel challenge =  shownChallenges[index];
+          final AssignedChallenges challenge =  shownChallenges[index];
           return _getSlidableCustomChallengeCard(challenge, index);
         });
   }
@@ -96,7 +97,7 @@ class _UserHomeState extends State<UserHome> {
     shownChallenges.clear();
     shownCards.clear();
     _keys.clear();
-    shownChallenges.addAll(allChallenges[selectedOccurrenceType]);
+    shownChallenges.addAll(allChallenges[selectedOccurrenceType] as Iterable<AssignedChallenges>);
     listView = _buildViewableList();
   }
 
@@ -117,13 +118,12 @@ class _UserHomeState extends State<UserHome> {
               child: Text(OccurrencesTransformer.toUiFormat(
                   OccurrencesTransformer.transformToString(currentItem))),
             );
-          }).toList(),
-          onChanged: (Occurrences newValue) {
+          }).toList(), onChanged: (Occurrences?  newValue) {
             setState(() {
-              currentlyDisplayed = newValue;
+              currentlyDisplayed = newValue!;
               changeDisplayedChallenges(currentlyDisplayed);
             });
-          },
+        },
         ),
         Text(
           challengePostfixMessage,
@@ -133,7 +133,7 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-  Widget _getSlidableCustomChallengeCard(ChallengeModel challenge, int index) {
+  Widget _getSlidableCustomChallengeCard(AssignedChallenges challenge, int index) {
     // add key for updating
     GlobalKey<ChallengeCardState> cardKey = GlobalKey();
     _keys.add(cardKey);
@@ -147,7 +147,7 @@ class _UserHomeState extends State<UserHome> {
         endActionPane: ActionPane(
           motion: const ScrollMotion(),
           children: [
-            CardCustomSlidableAction(cardKey: cardKey, challenge: challenge, userManager: widget.userManager, index: index),
+            CardCustomSlidableAction(cardKey: cardKey, challenge: challenge, userManager: widget.userManager, index: index, key: new GlobalKey(),),
           ],
         ),
         child: challengeCard
@@ -164,8 +164,8 @@ class _UserHomeState extends State<UserHome> {
     );
   }
 
-  Future<List<ChallengeModel>> getUserChallenges() async {
-    return await widget.userManager.getAssignChallenges();
+  Future<List<AssignedChallenges>> getUserChallenges() async {
+    return await widget.userManager.getAssignChallenges()!;
   }
 
   Widget _title() {
@@ -176,13 +176,13 @@ class _UserHomeState extends State<UserHome> {
       child: new Text(
         getUserGreeting(),
         style: TextStyle(
-          fontSize: Theme.of(context).textTheme.headline1.fontSize
+          fontSize: Theme.of(context).textTheme.headline1?.fontSize
         ),
       ),
     );
   }
 
-  String getUserGreeting() =>  "Good day, \n" + widget.userManager.username;
+  String getUserGreeting() =>  "Good day, \n" + widget.userManager.username!;
 }
 
 class CardCustomSlidableAction extends StatefulWidget {
@@ -196,12 +196,12 @@ class CardCustomSlidableAction extends StatefulWidget {
 
   int index;
 
-  ChallengeModel challenge;
+  AssignedChallenges challenge;
 
   GlobalKey<ChallengeCardState> cardKey;
 
 
-  CardCustomSlidableAction({this.cardKey, Key key, this.challenge,this.userManager, this.index}) : super(key: key);
+  CardCustomSlidableAction({required this.cardKey, required Key key, required this.challenge,required this.userManager, required this.index}) : super(key: key);
 
   @override
   State<CardCustomSlidableAction> createState() => _CardCustonSlidableActionState();
@@ -214,6 +214,18 @@ class _CardCustonSlidableActionState extends State<CardCustomSlidableAction> {
   Widget build(BuildContext context) {
     return CustomSlidableAction(
       backgroundColor: Color(0xFFF9F6F4),
+      autoClose: true,
+      onPressed: (BuildContext context) {
+        AssignedChallenges? firstWhere = widget.userManager.getAssignChallenges()?.firstWhere((element) => widget.challenge.id == element.id);
+        if (firstWhere != null) {
+          challengeService.upgradeProgressOfChallenge(
+              widget.userManager, firstWhere.id!);
+          double pace = 100 / widget.challenge.maxProgress!;
+          double challengeProgress = pace *
+              (widget.challenge.maxProgress! - widget.challenge.currentProgress!);
+          widget.cardKey.currentState?.updateChallengeProgress(challengeProgress);
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(25.0)),
@@ -223,9 +235,8 @@ class _CardCustonSlidableActionState extends State<CardCustomSlidableAction> {
           child: IconButton(
             iconSize: 30,
             icon: const Icon(Icons.done),
-            onPressed: () async => {
-              await challengeService.upgradeProgressOfChallenge(widget.userManager, widget.index),
-              widget.cardKey.currentState.updateChallengeProgress()
+            onPressed: () {
+              print('Not impl');
             },
           ),
         ),

@@ -15,7 +15,7 @@ class AnimatedUserChallengeWeb extends StatefulWidget {
 
 class _AnimatedUserChallengeWebState extends State<AnimatedUserChallengeWeb> {
   bool selected = false;
-  BuildContext context;
+  late BuildContext context;
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +47,8 @@ class _AnimatedUserChallengeWebState extends State<AnimatedUserChallengeWeb> {
                 child: Column(
                   children: [
                     ListTile(
-                        title: Text(widget.currentChallenge.title),
-                        subtitle: Text(widget.currentChallenge.description)
+                        title: Text(widget.currentChallenge.title!),
+                        subtitle: Text(widget.currentChallenge.description!)
                     ),
 
                   ],

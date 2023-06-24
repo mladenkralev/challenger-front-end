@@ -1,5 +1,4 @@
 import 'package:challenger/android/AndroidGlobalConstants.dart';
-import 'package:challenger/android/notifications/NotificationManager.dart';
 import 'package:challenger/android/screens/user/profile/components/OccurrenceSwitcher.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
@@ -28,7 +27,7 @@ class _AddCardState extends State<AddCard> {
   final descriptionController = TextEditingController();
 
   List<Widget> _buildOccurrenceItems() {
-    return occurrences.map((val) => OccurrenceSwitcher(title: val)).toList();
+    return occurrences.map((val) => OccurrenceSwitcher(title: val, key: new GlobalKey(),)).toList();
   }
 
   int occurrencesIndex = 0;
@@ -112,10 +111,11 @@ class _AddCardState extends State<AddCard> {
                       child: OccurrenceSwitcher(
                         isForList: false,
                         title: occurrences[occurrencesIndex],
+                        key: new GlobalKey(),
                       ),
                       onSelectedItemChanged: (index) {
                         setState(() {
-                          occurrencesIndex = index;
+                          occurrencesIndex = index!;
                         });
                       },
                       items: _buildOccurrenceItems()),
@@ -164,20 +164,16 @@ class _AddCardState extends State<AddCard> {
                       TextButton(
                         child: const Text("Accept"),
                         onPressed: () {
-                          NotificationManager.instance(context)
-                              .showNotification();
+
                           ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Processing Data')));
-                          widget.notifyParent(new ChallengeModel(
-                              null,
-                              titleController.text,
-                              descriptionController.text,
-                              OccurrencesTransformer.getEnumOccurrences(
-                                  occurrences[occurrencesIndex]),
-                              null,
-                              null,
-                              100,
-                              null));
+                          // widget.notifyParent(new ChallengeModel(
+                          //     1,
+                          //     titleController.text,
+                          //     descriptionController.text,
+                          //     OccurrencesTransformer.getEnumOccurrences(
+                          //         occurrences[occurrencesIndex]),
+                          //     ));
                           Navigator.pop(context);
                         },
                       ),

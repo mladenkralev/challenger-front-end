@@ -1,4 +1,5 @@
 import 'package:challenger/DependencyInjection.dart';
+import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/services/AssetService.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,14 +13,14 @@ class ExpandedCard extends StatefulWidget {
 
   double challengeProgress = 0;
 
-  final ChallengeModel challenge;
+  final AssignedChallenges challenge;
 
-  ExpandedCard (Key key, this.challenge) : super(key: key);
+  ExpandedCard (this.challenge);
 
   final loginService = locator<AssetService>();
 
   @override
-  State<ExpandedCard  > createState() => _ExpandedCardState();
+  State<ExpandedCard> createState() => _ExpandedCardState();
 }
 
 const loremIpsum =
@@ -28,10 +29,12 @@ const loremIpsum =
 class _ExpandedCardState extends State<ExpandedCard> {
 
   double challengeProgress = 0;
+  double pace = 0;
 
   @override
   Widget build(BuildContext context) {
-    challengeProgress = widget.challenge.numberOfProgressHits / 100;
+    challengeProgress = pace * (widget.challenge.maxProgress! - widget.challenge.currentProgress!);
+    pace = 100/ widget.challenge.maxProgress!;
 
     return Card(
       shape: RoundedRectangleBorder(
@@ -42,7 +45,7 @@ class _ExpandedCardState extends State<ExpandedCard> {
         decoration: new BoxDecoration(
             image: new DecorationImage(
               colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
-              image: widget.loginService.getImage(widget.challenge.blob.id),
+              image: widget.loginService.getImage(widget.challenge.challengeModel!.blob?.id),
               fit: BoxFit.cover,
             ),
             borderRadius: BorderRadius.circular(widget.cardRadius)
@@ -54,11 +57,11 @@ class _ExpandedCardState extends State<ExpandedCard> {
                 leading: new CircularPercentIndicator(
                   radius: 45.0,
                   lineWidth: 4.0,
-                  percent: challengeProgress,
-                  center: new Text(challengeProgress.toString()),
+                  percent: double.parse((challengeProgress).toStringAsFixed(1)),
+                  center: new Text(challengeProgress.toStringAsFixed(1)),
                   progressColor: Colors.red,
                 ),
-                title: Text(widget.challenge.title),
+                title: Text(widget.challenge.challengeModel!.title!),
                 subtitle: Text(
                   'A sufficiently long subtitle warrants three lines.',
                   style: TextStyle(

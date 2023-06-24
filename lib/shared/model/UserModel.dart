@@ -1,39 +1,43 @@
 import 'package:challenger/android/challenges/ChallengerFactory.dart';
+import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 
 class User {
-  int _id;
-  int _level;
-  String _email;
-  String _username;
-  String _title;
-  String _jwtToken;
+  int? _level;
+  String? _email;
+  String? _username;
+  String? _title;
+  String? _jwtToken;
 
-  bool _active;
-  ChallengerFactory challengeManager;
+  ChallengerFactory? challengeManager;
 
   static const String ASSIGNED_CHALLENGES = "assignedToUserChallenges";
   static const String CREATED_CHALLENGES = "createdByUserChallenges";
 
-  User.fromJson(Map<String, dynamic> json, String token)
-      : _id = json['id'],
-        _email = json['email'],
-        _username = json['username'],
-        _active = json['active'],
-        _jwtToken = token,
-        challengeManager = createUserChallengeManager(json);
+  User(Map<String, dynamic> json, String token) {
+    _email = json['email'];
+    _username = json['username'];
+    _jwtToken = token;
+    challengeManager = createUserChallengeManager(json);
+    }
 
   static ChallengerFactory createUserChallengeManager(
       Map<String, dynamic> json) {
-    var challengerFactory = new ChallengerFactory();
-    challengerFactory.addChallenges(CREATED_CHALLENGES,
-        ChallengeModel.fromList(json["createdByUserChallenges"]));
-    challengerFactory.addChallenges(ASSIGNED_CHALLENGES,
-        ChallengeModel.fromList(json["createdByUserChallenges"]));
+    ChallengerFactory challengerFactory = new ChallengerFactory();
+    var createdByUserChallenges = ChallengeModel.fromList(json["createdByUserChallenges"]);
+    print("Created by user challenges fetching " + createdByUserChallenges.toString());
+
+    var assignedToUserChallenges = AssignedChallenges.fromList(json["assignedToUserChallenges"]);
+    print("Assigned to user challenges fetching " + assignedToUserChallenges.toString());
+    
+    // challengerFactory.addChallenges(CREATED_CHALLENGES, createdByUserChallenges);
+    challengerFactory.addChallenges(ASSIGNED_CHALLENGES, assignedToUserChallenges);
+
+    var dailyChallenges = challengerFactory.getDailyChallenges("assignedToUserChallenges");
     return challengerFactory;
   }
 
-  ChallengerFactory get manager => challengeManager;
+  ChallengerFactory? get manager => challengeManager;
 
   int get level => _level ?? 1;
 

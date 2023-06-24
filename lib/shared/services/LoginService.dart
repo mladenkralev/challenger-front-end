@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/android/screens/user/profile/UserHomePage.dart';
@@ -9,20 +7,18 @@ import 'package:challenger/shared/model/UserModel.dart';
 import 'package:challenger/shared/services/ChallengeService.dart';
 import 'package:challenger/web/profile/UserHomeWeb.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
-
-import 'AssetService.dart';
-import '../model/UserManager.dart';
 import 'package:http/http.dart' as http;
+
+import '../model/UserManager.dart';
+import 'AssetService.dart';
 
 class LoginService {
   final challengeService = locator<ChallengeService>();
   final assetService = locator<AssetService>();
 
-  UserManager userManager;
+  late UserManager userManager;
 
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
@@ -86,7 +82,11 @@ class LoginService {
 
     return http.post(jwtAuthenticationUrl,
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json;charset=UTF-8',
+        'Access-Control-Allow-Origin': 'http://siteA.com',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Accept': '*/*',
       },
       body: jsonEncode(<String, String>{
         'email': email,

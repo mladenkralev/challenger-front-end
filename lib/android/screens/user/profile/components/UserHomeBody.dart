@@ -9,12 +9,12 @@ import '../UserHomePage.dart';
 
 class UserHomeBody {
   UserHomePageState parent;
-  List<Widget> widgetOptions;
+  List<Widget>? widgetOptions;
 
   UserHomeBody(this.parent) {
     widgetOptions = <Widget>[
       UserHome(this.parent.widget.userManager, parent.context),
-      new ProfileHome(this.parent.widget.userManager, parent.context),
+      // new ProfileHome(this.parent.widget.userManager, parent.context),
       AddCustomChallengePage(parent.context, this.parent.addNewChallenge),
     ];
   }
