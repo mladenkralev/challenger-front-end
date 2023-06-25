@@ -7,6 +7,8 @@ import 'package:challenger/shared/model/UserModel.dart';
 
 import 'package:http/http.dart' as http;
 
+import '../model/AssignedChallenges.dart';
+
 class ChallengeService {
   String jsonString = '''
   {
@@ -86,11 +88,10 @@ class ChallengeService {
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
 
-  Future<User> upgradeProgressOfChallenge(UserManager userManager, int challengeIndex) async {
+  Future<User> upgradeProgressOfChallenge(int? challengeIndex) async {
     print("Updating progress of challenge with id" + challengeIndex.toString());
     
-    var assignChallenge = userManager.getAssignChallenges()?[challengeIndex];
-    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/challenges/' + assignChallenge!.id.toString() + "/progress");
+    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/challenges/' + challengeIndex.toString() + "/progress");
     var token = userManager.user?.token;
 
     print("Pressed " + usersUrl.toString());
@@ -98,10 +99,13 @@ class ChallengeService {
     final userResponse = await http.post(usersUrl,
       headers: <String, String> {
         'Authorization': 'Bearer $token',
+        'Access-Control-Allow-Origin': 'http://siteA.com',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
     );
 
-    print("Response from progress update" + userResponse.statusCode.toString());
+    print("Response from progress update " + userResponse.statusCode.toString());
     return getUserChallenges(token!);
   }
 
@@ -115,6 +119,9 @@ class ChallengeService {
     final userResponse = await http.get(usersUrl,
       headers: <String, String> {
         'Authorization': 'Bearer $token',
+        'Access-Control-Allow-Origin': 'http://siteA.com',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
     );
 

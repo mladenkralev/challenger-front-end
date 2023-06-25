@@ -41,4 +41,9 @@ class AssignedChallenges {
     DateFormat format = DateFormat("yyyy-MM-dd");
     return format.parse(date);
   }
+
+  @override
+  String toString() {
+    return 'AssignedChallenges{id: $id, challengeModel: $challengeModel, startDate: $startDate, endDate: $endDate, currentProgress: $currentProgress, maxProgress: $maxProgress, isCompleted: $isCompleted}';
+  }
 }

@@ -28,8 +28,11 @@ class User {
     print("Created by user challenges fetching " + createdByUserChallenges.toString());
 
     var assignedToUserChallenges = AssignedChallenges.fromList(json["assignedToUserChallenges"]);
-    print("Assigned to user challenges fetching " + assignedToUserChallenges.toString());
-    
+
+    assignedToUserChallenges.forEach((element) {
+      print('Assigned Challenge ' + element.toString());
+    });
+
     // challengerFactory.addChallenges(CREATED_CHALLENGES, createdByUserChallenges);
     challengerFactory.addChallenges(ASSIGNED_CHALLENGES, assignedToUserChallenges);
 

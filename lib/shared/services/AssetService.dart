@@ -11,8 +11,14 @@ class AssetService {
 
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
 
+  Map<int,Image> inMemoryImages = {};
+
   ImageProvider getImage(int? id) {
-    var image = Image.network(BACKEND_AUTH_SERVICE + '/api/v1/blobs/' + id.toString());
+    if(inMemoryImages.containsKey(id)) {
+      return inMemoryImages[id]!.image;
+    }
+    Image image = Image.network(BACKEND_AUTH_SERVICE + '/api/v1/blobs/' + id.toString());
+    inMemoryImages.putIfAbsent(id!, () => image);
 
     return image.image;
   }

@@ -218,8 +218,7 @@ class _CardCustonSlidableActionState extends State<CardCustomSlidableAction> {
       onPressed: (BuildContext context) {
         AssignedChallenges? firstWhere = widget.userManager.getAssignChallenges()?.firstWhere((element) => widget.challenge.id == element.id);
         if (firstWhere != null) {
-          challengeService.upgradeProgressOfChallenge(
-              widget.userManager, firstWhere.id!);
+          challengeService.upgradeProgressOfChallenge(firstWhere.id!);
           double pace = 100 / widget.challenge.maxProgress!;
           double challengeProgress = pace *
               (widget.challenge.maxProgress! - widget.challenge.currentProgress!);

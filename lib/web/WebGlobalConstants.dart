@@ -12,4 +12,6 @@ class WebGlobalConstants {
   static final Color hardBlack = Colors.black;
   static final ColorScheme secondColor = ColorScheme.fromSwatch().copyWith(secondary: Colors.white60);
   static final backgroundColor = Color(0xFFF9F6F4);
+
+  static final double buttonFontSize = 20;
 }
