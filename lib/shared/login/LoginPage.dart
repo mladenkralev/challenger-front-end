@@ -24,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   String _email = "";
   String _password = "";
   FormType _form = FormType.login;
+  var _isLoading = false;
 
   UserManager? userManager;
 
@@ -145,14 +146,27 @@ class _LoginPageState extends State<LoginPage> {
             Container(
               padding: EdgeInsets.only(top: 20),
               width: double.maxFinite,
-              child: new ElevatedButton(
+              child: ElevatedButton.icon(
+                icon: _isLoading
+                    ? Container(
+                        width: 24,
+                        height: 24,
+                        padding: const EdgeInsets.all(2.0),
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 3,
+                        ),
+                      )
+                    : const Icon(Icons.feedback),
                 style: ElevatedButton.styleFrom(
-                    primary: Theme.of(context).primaryColor),
-                child: new Text(
+                  primary: Theme.of(context).primaryColor,
+                  textStyle: TextStyle(color: Colors.black),
+                ),
+                label: const Text(
                   'Login',
                   style: TextStyle(color: Colors.black),
                 ),
-                onPressed: _loginPressed,
+                onPressed: _isLoading ? null : _onSubmit,
               ),
             ),
             new TextButton(
@@ -219,5 +233,10 @@ class _LoginPageState extends State<LoginPage> {
 
   void _passwordReset() {
     loginService.passwordReset();
+  }
+
+  void _onSubmit() {
+    setState(() => _isLoading = true);
+    _loginPressed();
   }
 }

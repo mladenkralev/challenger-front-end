@@ -1,12 +1,13 @@
-import 'package:challenger/shared/card/ChallengeCard.dart';
 import 'package:challenger/shared/card/HomeCardChallenge.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
+import 'package:challenger/shared/model/HistoryChallenges.dart';
 import 'package:challenger/shared/model/UserManager.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 import 'package:flutter/material.dart';
 
 import '../../../DependencyInjection.dart';
 import '../../../shared/services/ChallengeService.dart';
+import '../../../shared/services/HistoryChallengeService.dart';
 
 class UserHomeWebPage extends StatefulWidget {
   final UserManager userManager;
@@ -22,6 +23,8 @@ class UserHomeWebPage extends StatefulWidget {
 class _UserHomeWebPageState extends State<UserHomeWebPage> {
   final challengeService = locator<ChallengeService>();
 
+  final historyChallengeService = locator<HistoryChallengeService>();
+
   final List<Key> _keys1 = List.empty(growable: true);
 
   String challengePrefixMessage = "Your ";
@@ -36,6 +39,8 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
   List<AssignedChallenges> shownChallenges = List.empty(growable: true);
   List<HomeCardChallenge> shownCards1 = List.empty(growable: true);
   Map<Occurrences, List<AssignedChallenges>> allChallenges = {};
+
+  Stream<List<HistoryChallenge>>? historyChallenges;
 
   Function(AssignedChallenges, Key)? notifyParent;
 
@@ -78,7 +83,6 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
           }).toList(),
           onChanged: (Occurrences? value) {
             setState(() {
-              print('THERE WAS AN UPDATE');
               currentlyDisplayed = value!;
               changeDisplayedChallenges(currentlyDisplayed);
             });
@@ -102,18 +106,37 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
           style: TextStyle(fontSize: 18),
         ),
         Expanded(
-          child: ListView.builder(
-            shrinkWrap: true,
-            padding: EdgeInsets.all(12.0),
-            itemBuilder: (ctx, int) {
-              return Card(
-                child: ListTile(
-                    title: Text('Motivation $int'),
-                    subtitle: Text('this is a description of the motivation')),
+            child: StreamBuilder<List<HistoryChallenge>>(
+          stream: getHistoryChallenges(),
+          // Call the function that fetches the data
+          builder: (ctx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator(); // Show a loading indicator while fetching the data
+            } else if (snapshot.hasError) {
+              return Text(
+                  'Error: ${snapshot.error}'); // Show an error message if there's an error
+            } else {
+              // Use the fetched data to populate the ListView
+              return ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.all(12.0),
+                itemCount: snapshot.data?.length,
+                itemBuilder: (ctx, index) {
+                  return Card(
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        child: Icon(Icons.check),
+                      ),
+                      title: Text(
+                          '${snapshot.data?[index].assignedChallenges?.challengeModel?.title}'),
+                      subtitle: Text('${snapshot.data?[index].progressDate}'),
+                    ),
+                  );
+                },
               );
-            },
-          ),
-        ),
+            }
+          },
+        )),
       ],
     );
   }
@@ -133,7 +156,8 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     _keys1.add(cardKey);
 
     // remember the card for clear and adding again
-    HomeCardChallenge challengeCard = new HomeCardChallenge(_keys1, cardKey, challenge, this.removeExistingChallenge);
+    HomeCardChallenge challengeCard = new HomeCardChallenge(
+        _keys1, cardKey, challenge, this.removeExistingChallenge);
     shownCards1.add(challengeCard);
 
     // wrap with slidable
@@ -157,11 +181,19 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
   // REMOVING FROM LIST
   removeExistingChallenge(AssignedChallenges existingChallenge, Key key) {
     setState(() {
-      AssignedChallenges? firstWhere = widget.userManager.getAssignChallenges()?.firstWhere((element) => existingChallenge.id == element.id);
+      AssignedChallenges? firstWhere = widget.userManager
+          .getAssignChallenges()
+          ?.firstWhere((element) => existingChallenge.id == element.id);
       challengeService.upgradeProgressOfChallenge(firstWhere?.id);
+      getHistoryChallenges();
       _keys1.remove(key);
       shownChallenges.remove(existingChallenge);
       widget.userManager?.abandonChallenge(existingChallenge);
     });
+  }
+
+  Stream<List<HistoryChallenge>>? getHistoryChallenges() {
+    this.historyChallenges = historyChallengeService.fetchHistoryData();
+    return historyChallenges;
   }
 }

@@ -37,6 +37,18 @@ class AssignedChallenges {
     return challenges;
   }
 
+  factory AssignedChallenges.fromJson(Map<String, dynamic> json) {
+    return AssignedChallenges(
+      json['id'],
+      ChallengeModel.fromJson(json['challengeDatabase']),
+      parseDate(json['startDate']),
+      parseDate(json['endDate']),
+      json['currentProgress'],
+      json['maxProgress'],
+      json['isCompleted'],
+    );
+  }
+
   static DateTime parseDate(String date) {
     DateFormat format = DateFormat("yyyy-MM-dd");
     return format.parse(date);

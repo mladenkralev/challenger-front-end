@@ -1,16 +1,15 @@
-import 'package:challenger/web/WebGlobalConstants.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 import '../../DependencyInjection.dart';
+import '../loading/CardDetails.dart';
 import '../model/AssignedChallenges.dart';
 import '../services/AssetService.dart';
-import '../services/ChallengeService.dart';
 
 class CardDetails extends StatelessWidget {
   final loginService = locator<AssetService>();
 
+  bool _isLoading = false;
   var _specificCard = "seeSpecificCard";
   double cardRadius = 20;
 
@@ -85,7 +84,6 @@ class CardDetails extends StatelessWidget {
                           ),
                           child: const Text('DONE'),
                           onPressed: () {
-
                             notifyParent(_challenge, key);
                             Navigator.pop(context);
                           },
