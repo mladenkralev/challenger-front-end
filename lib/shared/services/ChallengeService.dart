@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -6,89 +7,22 @@ import 'package:challenger/shared/model/UserManager.dart';
 import 'package:challenger/shared/model/UserModel.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 
 import '../model/AssignedChallenges.dart';
 
 class ChallengeService {
-  String jsonString = '''
-  {
-    "email": "test@abv.bg",
-    "username": "test",
-    "createdByUserChallenges": [
-        {
-            "id": 3,
-            "title": "You are a MACHINE!",
-            "description": "Train every day for at least 20 minutes",
-            "occurrences": "WEEK",
-            "badges": [],
-            "startDate": "2022-01-05",
-            "endDate": "2022-01-31",
-            "numberOfProgressHits": 0.0
-        },
-        {
-            "id": 2,
-            "title": "You are a MACHINE!",
-            "description": "Train every day for at least 20 minutes",
-            "occurrences": "DAY",
-            "badges": [],
-            "startDate": "2022-01-05",
-            "endDate": "2022-01-31",
-            "numberOfProgressHits": 0.0
-        },
-        {
-            "id": 1,
-            "title": "Knowledge is power!",
-            "description": "Read a book every week!",
-            "occurrences": "DAY",
-            "badges": [],
-            "startDate": "2022-01-05",
-            "endDate": "2022-01-31",
-            "numberOfProgressHits": 0.0
-        }
-    ],
-    "assignedToUserChallenges": [
-        {
-            "id": 3,
-            "title": "You are a MACHINE!",
-            "description": "Train every day for at least 20 minutes",
-            "occurrences": "WEEK",
-            "badges": [],
-            "startDate": "2022-01-05",
-            "endDate": "2022-01-31",
-            "numberOfProgressHits": 0.0
-        },
-        {
-            "id": 2,
-            "title": "You are a MACHINE!",
-            "description": "Train every day for at least 20 minutes",
-            "occurrences": "DAY",
-            "badges": [],
-            "startDate": "2022-01-05",
-            "endDate": "2022-01-31",
-            "numberOfProgressHits": 0.0
-        },
-        {
-            "id": 1,
-            "title": "Knowledge is power!",
-            "description": "Read a book every week!",
-            "occurrences": "DAY",
-            "badges": [],
-            "startDate": "2022-01-05",
-            "endDate": "2022-01-31",
-            "numberOfProgressHits": 0.0
-        }
-    ]
-}
-
-  ''';
-
 
   final userManager = locator<UserManager>();
 
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
+  final _challengeDataController = StreamController<List<AssignedChallenges>>();
+  StompClient? stompClient;
 
-  Future<User> upgradeProgressOfChallenge(int? challengeIndex) async {
+  void upgradeProgressOfChallenge(int? challengeIndex) async {
     print("Updating progress of challenge with id" + challengeIndex.toString());
     
     var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/challenges/' + challengeIndex.toString() + "/progress");
@@ -106,41 +40,78 @@ class ChallengeService {
     );
 
     print("Response from progress update " + userResponse.statusCode.toString());
-    return getUserChallenges(token!);
+
   }
 
-  Future<User> getUserChallenges(String token) async {
-    String userDataUrl = BACKEND_AUTH_SERVICE + '/api/v1/users';
+  Stream<List<AssignedChallenges>> getUserChallenges(String token) {
 
-    log('Getting user data from ' + userDataUrl);
+    connectAndSubscribe(token!);
 
-    var usersUrl = Uri.parse(userDataUrl);
+    return _challengeDataController.stream;
+  }
 
-    final userResponse = await http.get(usersUrl,
-      headers: <String, String> {
-        'Authorization': 'Bearer $token',
-        'Access-Control-Allow-Origin': 'http://siteA.com',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
+  Future<void> connectAndSubscribe(String token) async {
+    StompConfig conf = StompConfig(
+      url: 'ws://localhost:8080/websocket',
+      onConnect: onConnectCallback,
+      onWebSocketError: (e) => print(e.toString()),
+      onStompError: (d) => print('error stomp'),
+      onDisconnect: (f) => print('disconnected'),
     );
 
-    Map<String, dynamic> userData = jsonDecode(userResponse.body);
-    User user = new User(userData, token);
-    print(user.challengeManager?.getChallenges("assignedToUserChallenges"));
-    userManager.attachUser(user);
+    stompClient = StompClient(config: conf)..activate();
 
-    return user;
+    print(stompClient?.isActive);
   }
 
-  /// TESTING DUMMY DATA
-  Future<User> getDummyChallenges(String token) async {
+  void onConnectCallback(StompFrame connectFrame) {
+    stompClient?.subscribe(
+        destination: '/assigned-response',
+        headers: {},
+        callback: (frame) {
+          if (frame.body != null) {
+            // Received a frame for this subscription
+            String? body = frame.body;
+            List<dynamic> assignedData = jsonDecode(body!);
+            List<AssignedChallenges> currentResult = getAssignedChallenges(assignedData);
 
-    Map<String, dynamic> userData = jsonDecode(jsonString);
-    User user = new User(userData, token);
-    print(user.challengeManager?.getChallenges("assignedToUserChallenges"));
-    userManager.attachUser(user);
+            _challengeDataController.add(currentResult);
+            // for (HistoryChallenge item in currentResult!) {
+            //   print('ITEM: ' + item.toString());
+            // }
+          }
+        });
 
-    return user;
+    // initial
+    sendServerUpdate();
+
+    Timer.periodic(
+      Duration(seconds: 30),
+          (Timer t) => sendServerUpdate()
+    );
   }
+
+  void sendServerUpdate() {
+    print('Sending server an update ...');
+    stompClient?.send(
+      destination: '/assigned',
+      body: userManager.user?.email,
+      headers: {},
+    );
+  }
+
+  List<AssignedChallenges> getAssignedChallenges(List<dynamic> assignedChallenges) {
+    List<AssignedChallenges> result = [];
+    for (var item in assignedChallenges) {
+      // Access individual items in the list using the 'item' variable
+      // Perform operations or access properties of each item here
+      AssignedChallenges challenge = AssignedChallenges.fromJson(item);
+      result.add(challenge);
+    }
+    return result;
+  }
+
+
+
+
 }

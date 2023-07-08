@@ -18,7 +18,7 @@ class User {
     _email = json['email'];
     _username = json['username'];
     _jwtToken = token;
-    challengeManager = createUserChallengeManager(json);
+    // challengeManager = createUserChallengeManager(json);
     }
 
   static ChallengerFactory createUserChallengeManager(

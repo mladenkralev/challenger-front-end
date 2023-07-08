@@ -20,9 +20,8 @@ class HomeCardChallenge extends StatefulWidget {
   List<Key>? allAssignedKeys;
   Key key;
   final AssignedChallenges challenge;
-  Function(AssignedChallenges, Key)? notifyParent;
 
-  HomeCardChallenge(this.allAssignedKeys, this.key, this.challenge, this.notifyParent);
+  HomeCardChallenge(this.allAssignedKeys, this.key, this.challenge);
 
   @override
   State<HomeCardChallenge> createState() => HomeCardChallengeState();
@@ -44,7 +43,7 @@ class HomeCardChallengeState extends State<HomeCardChallenge> {
     pace = 100 / widget.challenge.maxProgress!;
 
     return InkWell(
-      onTap: () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => CardDetails(widget.notifyParent!, widget.challenge, widget.key))),
+      onTap: () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => CardDetails( widget.challenge, widget.key))),
       child: Hero(
         tag:  _specificCard + widget.challenge.id.toString() + widget.challenge.challengeModel!.id.toString(),
         child: Card(

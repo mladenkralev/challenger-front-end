@@ -1,3 +1,5 @@
+import 'package:challenger/shared/services/ChallengeService.dart';
+import 'package:challenger/shared/services/HistoryChallengeService.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -8,16 +10,17 @@ import '../services/AssetService.dart';
 
 class CardDetails extends StatelessWidget {
   final loginService = locator<AssetService>();
+  final challengeService = locator<ChallengeService>();
+  final historyService = locator<HistoryChallengeService>();
 
   bool _isLoading = false;
   var _specificCard = "seeSpecificCard";
   double cardRadius = 20;
 
   final AssignedChallenges _challenge;
-  final Function(AssignedChallenges, Key) notifyParent;
   Key key;
 
-  CardDetails(this.notifyParent, this._challenge, this.key);
+  CardDetails(this._challenge, this.key);
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +87,9 @@ class CardDetails extends StatelessWidget {
                           ),
                           child: const Text('DONE'),
                           onPressed: () {
-                            notifyParent(_challenge, key);
+                            challengeService.upgradeProgressOfChallenge(_challenge?.id);
+                            historyService.sendServerUpdate();
+                            challengeService.sendServerUpdate();
                             Navigator.pop(context);
                           },
                         ),

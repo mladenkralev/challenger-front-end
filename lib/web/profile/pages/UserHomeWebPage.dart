@@ -45,18 +45,7 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
   Function(AssignedChallenges, Key)? notifyParent;
 
   @override
-  void initState() {
-    allChallenges.putIfAbsent(
-        Occurrences.DAY, () => widget.userManager.getDailyAssignChallenges()!);
-    allChallenges.putIfAbsent(Occurrences.WEEK,
-        () => widget.userManager.getWeeklyAssignChallenges()!);
-    allChallenges.putIfAbsent(Occurrences.MONTH,
-        () => widget.userManager.getMonthlyAssignChallenges()!);
-
-    shownChallenges.clear();
-    shownChallenges
-        .addAll(allChallenges[Occurrences.DAY] as Iterable<AssignedChallenges>);
-  }
+  void initState() {}
 
   @override
   Widget build(BuildContext context) {
@@ -91,14 +80,34 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
         Container(
           height: 300,
           child: Container(
-            child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemCount: shownChallenges.length,
-                itemBuilder: (context, index) {
-                  final AssignedChallenges challenge = shownChallenges[index];
-                  return _getCard(challenge, index);
-                }),
+            child: StreamBuilder<List<AssignedChallenges>>(
+              stream: getShownChallenges(),
+              // should return a Stream<List<AssignedChallenges>>
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator(); // Loading indicator while data is loading
+                } else if (snapshot.hasError) {
+                  return Text(
+                      'Error: ${snapshot.error}'); // Error message in case of error
+                } else {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    snapshot.data?.sort((a, b) => a.challengeModel!.title!.compareTo(b.challengeModel!.title!));
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final AssignedChallenges challenge =
+                            snapshot.data![index];
+                        return _getCard(challenge, index);
+                      },
+                    );
+                  } else {
+                    return Text('No data'); // In case no data is available
+                  }
+                }
+              },
+            ),
           ),
         ),
         Text(
@@ -156,8 +165,8 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     _keys1.add(cardKey);
 
     // remember the card for clear and adding again
-    HomeCardChallenge challengeCard = new HomeCardChallenge(
-        _keys1, cardKey, challenge, this.removeExistingChallenge);
+    HomeCardChallenge challengeCard =
+        new HomeCardChallenge(_keys1, cardKey, challenge);
     shownCards1.add(challengeCard);
 
     // wrap with slidable
@@ -178,22 +187,12 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     return await widget.userManager.getAssignChallenges();
   }
 
-  // REMOVING FROM LIST
-  removeExistingChallenge(AssignedChallenges existingChallenge, Key key) {
-    setState(() {
-      AssignedChallenges? firstWhere = widget.userManager
-          .getAssignChallenges()
-          ?.firstWhere((element) => existingChallenge.id == element.id);
-      challengeService.upgradeProgressOfChallenge(firstWhere?.id);
-      getHistoryChallenges();
-      _keys1.remove(key);
-      shownChallenges.remove(existingChallenge);
-      widget.userManager?.abandonChallenge(existingChallenge);
-    });
-  }
-
   Stream<List<HistoryChallenge>>? getHistoryChallenges() {
     this.historyChallenges = historyChallengeService.fetchHistoryData();
     return historyChallenges;
+  }
+
+  Stream<List<AssignedChallenges>>? getShownChallenges() {
+    return challengeService.getUserChallenges(widget.userManager.user!.token);
   }
 }

@@ -39,20 +39,30 @@ class LoginService {
   Future<User> login(String email, String password, BuildContext context, UserManager userManager) async {
     log('Login with email $email');
 
-    // String token = "123";
-    // User user = await challengeService.getDummyChallenges(token);
-    // Navigator.pushReplacement(
-    //           context,
-    //           MaterialPageRoute(
-    //             builder: (context) => UserHomePage(userManager),
-    //           ));
     Response response = await sendLoginRequest(email, password);
 
     if (response.statusCode == 200) {
       Map<String, dynamic> body =  jsonDecode(response.body);
       String token = body['jwt'];
 
-      User user = await challengeService.getUserChallenges(token);
+      String userDataUrl = BACKEND_AUTH_SERVICE + '/api/v1/users';
+
+      log('Getting user data from ' + userDataUrl);
+
+      var usersUrl = Uri.parse(userDataUrl);
+
+      final userResponse = await http.get(usersUrl,
+        headers: <String, String> {
+          'Authorization': 'Bearer $token',
+          'Access-Control-Allow-Origin': 'http://siteA.com',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        },
+      );
+
+      Map<String, dynamic> userData = jsonDecode(userResponse.body);
+      User user = new User(userData, token);
+      userManager.attachUser(user);
       print("new user is " + user.username);
 
       var nextPage;

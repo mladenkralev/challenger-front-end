@@ -17,6 +17,7 @@ class HistoryChallengeService {
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
   final _historyDataController = StreamController<List<HistoryChallenge>>();
+  StompClient? stompClient;
 
   Stream<List<HistoryChallenge>> fetchHistoryData() {
     print("Getting history of challenges");
@@ -25,48 +26,11 @@ class HistoryChallengeService {
     var token = userManager.user?.token;
 
     print("Pressed " + usersUrl.toString());
-    // final history = await http.get(
-    //   usersUrl,
-    //   headers: <String, String>{
-    //     'Authorization': 'Bearer $token',
-    //     'Access-Control-Allow-Origin': 'http://siteA.com',
-    //     'Access-Control-Allow-Methods': 'GET, POST, PUT',
-    //     'Access-Control-Allow-Headers': 'Content-Type',
-    //   },
-    // );
-    //
-    // List<dynamic> historyData = jsonDecode(history.body);
-    // List<HistoryChallenge> result = getHistoryData(historyData);
+
     connectAndSubscribe(token!);
-    // if (stompClient!.isActive) {
-    //   stompClient?.send(destination: '/your-destination', headers: {});
-    // }
 
     return _historyDataController.stream;
   }
-
-  List<HistoryChallenge> getHistoryData(List<dynamic> historyData) {
-    List<HistoryChallenge> result = [];
-    for (var item in historyData) {
-      // Access individual items in the list using the 'item' variable
-      // Perform operations or access properties of each item here
-      Map<String, dynamic> json = item['assignedChallenges'];
-      AssignedChallenges challenge = AssignedChallenges.fromJson(json);
-
-      String progressDateJson = item['progressDate'];
-      var historyChallenge =
-          new HistoryChallenge(parseDate(progressDateJson), challenge);
-      result.add(historyChallenge);
-    }
-    return result;
-  }
-
-  static DateTime parseDate(String date) {
-    DateFormat format = DateFormat("yyyy-MM-dd");
-    return format.parse(date);
-  }
-
-  StompClient? stompClient;
 
   Future<void> connectAndSubscribe(String token) async {
     StompConfig conf = StompConfig(
@@ -84,7 +48,7 @@ class HistoryChallengeService {
 
   void onConnectCallback(StompFrame connectFrame) {
     stompClient?.subscribe(
-        destination: '/your-topic',
+        destination: '/history-response',
         headers: {},
         callback: (frame) {
           if (frame.body != null) {
@@ -101,17 +65,39 @@ class HistoryChallengeService {
         });
 
     // initial
-    stompClient?.send(
-      destination: '/your-destination',
-      headers: {},
-    );
+    sendServerUpdate();
 
     Timer.periodic(
         Duration(seconds: 30),
-        (Timer t) => stompClient?.send(
-          destination: '/your-destination',
-          headers: {},
-        ),
+        (Timer t) => sendServerUpdate()
     );
+  }
+
+  void sendServerUpdate() {
+    stompClient?.send(
+      destination: '/history',
+      headers: {},
+    );
+  }
+
+  List<HistoryChallenge> getHistoryData(List<dynamic> historyData) {
+    List<HistoryChallenge> result = [];
+    for (var item in historyData) {
+      // Access individual items in the list using the 'item' variable
+      // Perform operations or access properties of each item here
+      Map<String, dynamic> json = item['assignedChallenges'];
+      AssignedChallenges challenge = AssignedChallenges.fromJson(json);
+
+      String progressDateJson = item['progressDate'];
+      var historyChallenge =
+      new HistoryChallenge(parseDate(progressDateJson), challenge);
+      result.add(historyChallenge);
+    }
+    return result;
+  }
+
+  static DateTime parseDate(String date) {
+    DateFormat format = DateFormat("yyyy-MM-dd");
+    return format.parse(date);
   }
 }
