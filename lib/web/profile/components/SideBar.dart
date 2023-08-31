@@ -1,14 +1,17 @@
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/web/WebGlobalConstants.dart';
+import 'package:challenger/web/profile/BrowseChallenge.dart';
+import 'package:challenger/web/profile/TreeChallenge.dart';
 import 'package:challenger/web/profile/UserHomeWeb.dart';
+import 'package:challenger/web/profile/pages/ChallengeTree.dart';
 import 'package:challenger/web/profile/pages/UserHomeWebPage.dart';
-import 'package:challenger/web/profile/pages/ProfilePage.dart';
+import 'package:challenger/web/profile/ProfilePage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 class SideBar extends StatefulWidget {
-  UserManager userManager;
+  UserManagerService userManager;
 
   SideBar(this.userManager);
 
@@ -38,10 +41,24 @@ class _SideBarState extends State<SideBar> {
             },
           ),
           ListTile(
+            title: Text("Browse"),
+            leading: Icon(Icons.density_large_rounded),
+            onTap: () {
+              Get.to(BrowseChallenge(widget.userManager));
+            },
+          ),
+          ListTile(
             title: Text("Profile"),
             leading: Icon(Icons.person_rounded),
             onTap: () {
               Get.to(ProfilePage(widget.userManager));
+            },
+          ),
+          ListTile(
+            title: Text("Challenge Tree"),
+            leading: Icon(Icons.person_rounded),
+            onTap: () {
+              Get.to(TreeChallenge(widget.userManager));
             },
           )
         ],

@@ -11,19 +11,19 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 
-import '../model/UserManager.dart';
+import 'UserManager.dart';
 import 'AssetService.dart';
 
 class LoginService {
   final challengeService = locator<ChallengeService>();
   final assetService = locator<AssetService>();
 
-  late UserManager userManager;
+  late UserManagerService userManager;
 
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
 
-  void loginAndSwitchToUserScreen(UserManager userManager , String _email, String _password, BuildContext context) async {
+  void loginAndSwitchToUserScreen(UserManagerService userManager , String _email, String _password, BuildContext context) async {
     await login(_email, _password, context, userManager);
   }
 
@@ -36,7 +36,7 @@ class LoginService {
     print("The user wants a password reset");
   }
 
-  Future<User> login(String email, String password, BuildContext context, UserManager userManager) async {
+  Future<User> login(String email, String password, BuildContext context, UserManagerService userManager) async {
     log('Login with email $email');
 
     Response response = await sendLoginRequest(email, password);
@@ -63,7 +63,7 @@ class LoginService {
       Map<String, dynamic> userData = jsonDecode(userResponse.body);
       User user = new User(userData, token);
       userManager.attachUser(user);
-      print("new user is " + user.username);
+      print("new user is " + user.username  + " and his id is " + user.id.toString() );
 
       var nextPage;
       if (kIsWeb) {

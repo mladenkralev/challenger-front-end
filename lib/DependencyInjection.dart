@@ -1,7 +1,7 @@
 import 'package:challenger/shared/services/HistoryChallengeService.dart';
 import 'package:get_it/get_it.dart';
 
-import 'shared/model/UserManager.dart';
+import 'shared/services/UserManager.dart';
 import 'shared/services/AssetService.dart';
 import 'shared/services/ChallengeService.dart';
 import 'shared/services/LoginService.dart';
@@ -11,7 +11,7 @@ final locator = GetIt.instance;
 void configureDependencies() {
   locator.registerLazySingleton<LoginService>(() => LoginService());
   locator.registerLazySingleton<ChallengeService>(() => ChallengeService());
-  locator.registerLazySingleton<UserManager>(() => UserManager());
+  locator.registerLazySingleton<UserManagerService>(() => UserManagerService());
   locator.registerLazySingleton<AssetService>(() => AssetService());
   locator.registerLazySingleton<HistoryChallengeService>(() => HistoryChallengeService());
 }

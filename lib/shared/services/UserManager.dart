@@ -1,15 +1,15 @@
 import 'package:challenger/shared/model/ChallengeModel.dart';
 
-import 'AssignedChallenges.dart';
-import 'UserModel.dart';
+import '../model/AssignedChallenges.dart';
+import '../model/UserModel.dart';
 
-class UserManager {
+class UserManagerService {
   User? user;
 
   static const String ASSIGNED_CHALLENGES = "assignedToUserChallenges";
   static const String CREATED_CHALLENGES = "createdByUserChallenges";
 
-  UserManager attachUser(User user) {
+  UserManagerService attachUser(User user) {
     this.user = user;
     return this;
   }

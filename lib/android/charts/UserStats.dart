@@ -1,8 +1,8 @@
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:flutter/material.dart';
 
 class UserStats extends StatefulWidget {
-  UserManager userManager;
+  UserManagerService userManager;
 
   UserStats(this.userManager);
 

@@ -40,52 +40,41 @@ class _ExpandedCardState extends State<ExpandedCard> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(widget.cardRadius),
       ),
-      child: Container(
-        constraints: BoxConstraints.expand(height: 300),
-        decoration: new BoxDecoration(
-            image: new DecorationImage(
-              colorFilter: new ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.dstATop),
-              image: widget.loginService.getImage(widget.challenge.challengeModel!.blob?.id),
-              fit: BoxFit.cover,
-            ),
-            borderRadius: BorderRadius.circular(widget.cardRadius)
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListTile(
-                leading: new CircularPercentIndicator(
-                  radius: 45.0,
-                  lineWidth: 4.0,
-                  percent: double.parse((challengeProgress).toStringAsFixed(1)),
-                  center: new Text(challengeProgress.toStringAsFixed(1)),
-                  progressColor: Colors.red,
+      child: Column(
+        children: [
+          Expanded(
+            child: ListTile(
+              leading: new CircularPercentIndicator(
+                radius: 45.0,
+                lineWidth: 4.0,
+                percent: double.parse((challengeProgress).toStringAsFixed(1)),
+                center: new Text(challengeProgress.toStringAsFixed(1)),
+                progressColor: Colors.red,
+              ),
+              title: Text(widget.challenge.challengeModel!.title!),
+              subtitle: Text(
+                'A sufficiently long subtitle warrants three lines.',
+                style: TextStyle(
+
                 ),
-                title: Text(widget.challenge.challengeModel!.title!),
-                subtitle: Text(
-                  'A sufficiently long subtitle warrants three lines.',
+              ),
+              trailing: Icon(Icons.done_outline_sharp),
+              isThreeLine: true,
+            ),
+          ),
+          Expanded(
+              child: Container(
+                alignment: Alignment.topLeft,
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  loremIpsum,
                   style: TextStyle(
 
                   ),
                 ),
-                trailing: Icon(Icons.done_outline_sharp),
-                isThreeLine: true,
-              ),
-            ),
-            Expanded(
-                child: Container(
-                  alignment: Alignment.topLeft,
-                  padding: EdgeInsets.all(20),
-                  child: Text(
-                    loremIpsum,
-                    style: TextStyle(
-
-                    ),
-                  ),
-                )
-            )
-          ],
-        ),
+              )
+          )
+        ],
       ),
     );;
   }

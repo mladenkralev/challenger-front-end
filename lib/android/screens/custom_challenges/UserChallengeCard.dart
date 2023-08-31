@@ -1,5 +1,5 @@
 import 'package:challenger/shared/model/ChallengeModel.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +9,7 @@ import '../../../shared/model/AssignedChallenges.dart';
 class UserChallengeCard extends StatefulWidget {
   final Function(ChallengeModel) notifyParent;
   final AssignedChallenges challenge;
-  final UserManager user;
+  final UserManagerService user;
 
   UserChallengeCard(this.challenge,this.user, this.notifyParent);
 

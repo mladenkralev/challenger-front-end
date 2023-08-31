@@ -1,7 +1,7 @@
 import 'package:challenger/android/AndroidGlobalConstants.dart';
 import 'package:challenger/android/screens/user/profile/UserHomePage.dart';
 import 'package:challenger/shared/login/LoginPage.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -15,7 +15,7 @@ class EntryPage extends StatefulWidget {
 }
 
 class _EntryPageState extends State<EntryPage> {
-  final userManager = locator<UserManager>();
+  final userManager = locator<UserManagerService>();
 
   @override
   void initState() {

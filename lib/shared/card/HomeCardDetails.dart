@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/shared/services/ChallengeService.dart';
 import 'package:challenger/shared/services/HistoryChallengeService.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -8,7 +10,7 @@ import '../loading/CardDetails.dart';
 import '../model/AssignedChallenges.dart';
 import '../services/AssetService.dart';
 
-class CardDetails extends StatelessWidget {
+class HomeCardDetails extends StatelessWidget {
   final loginService = locator<AssetService>();
   final challengeService = locator<ChallengeService>();
   final historyService = locator<HistoryChallengeService>();
@@ -20,7 +22,7 @@ class CardDetails extends StatelessWidget {
   final AssignedChallenges _challenge;
   Key key;
 
-  CardDetails(this._challenge, this.key);
+  HomeCardDetails(this._challenge, this.key);
 
   @override
   Widget build(BuildContext context) {

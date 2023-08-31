@@ -1,5 +1,5 @@
 import 'package:challenger/shared/login/LoginPage.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/web/WebGlobalConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,7 +17,7 @@ class EntryPageWeb extends StatefulWidget {
 }
 
 class _EntryPageWebState extends State<EntryPageWeb> {
-  final userManager = locator<UserManager>();
+  final userManager = locator<UserManagerService>();
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _EntryPageWebState extends State<EntryPageWeb> {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
             primaryColor: WebGlobalConstants.primaryColor,
-            colorScheme: WebGlobalConstants.secondColor,
+            colorScheme: WebGlobalConstants.colorScheme,
             backgroundColor: WebGlobalConstants.backgroundColor,
             textTheme: GoogleFonts.mulishTextTheme().apply(
                 bodyColor: Colors.black

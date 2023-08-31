@@ -1,10 +1,10 @@
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/services/LoginService.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
-  final UserManager userManager;
+  final UserManagerService userManager;
 
   LoginPage(this.userManager);
 
@@ -26,11 +26,11 @@ class _LoginPageState extends State<LoginPage> {
   FormType _form = FormType.login;
   var _isLoading = false;
 
-  UserManager? userManager;
+  UserManagerService? userManager;
 
   final loginService = locator<LoginService>();
 
-  _LoginPageState(UserManager userManager) {
+  _LoginPageState(UserManagerService userManager) {
     this.userManager = userManager;
 
     _emailFilter.addListener(_emailListen);

@@ -1,7 +1,7 @@
 
 import 'package:challenger/android/screens/user/profile/components/UserHomeBody.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ class UserHomePage extends StatefulWidget {
   static const String id = 'user_profile_page';
 
   // User user
-  UserManager userManager;
+  UserManagerService userManager;
 
   UserHomePage(this.userManager);
 

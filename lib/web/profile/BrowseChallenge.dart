@@ -3,23 +3,26 @@ import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 import 'package:challenger/web/WebGlobalConstants.dart';
 import 'package:challenger/web/profile/components/SideBar.dart';
+import 'package:challenger/web/profile/pages/BrowseChallengePage.dart';
 import 'package:challenger/web/profile/pages/UserHomeWebPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class UserHomeWeb extends StatefulWidget {
+import 'pages/ChallengeTree.dart';
+
+class BrowseChallenge extends StatefulWidget {
   static const String id = 'user_profile_page';
 
   // User user
   UserManagerService userManager;
 
-  UserHomeWeb(this.userManager);
+  BrowseChallenge(this.userManager);
 
   @override
-  UserHomeWebState createState() => UserHomeWebState();
+  BrowseChallengeState createState() => BrowseChallengeState();
 }
 
-class UserHomeWebState extends State<UserHomeWeb> {
+class BrowseChallengeState extends State<BrowseChallenge> {
   Occurrences currentlyDisplayed = Occurrences.DAY;
 
   String getUserGreeting() =>  "Good day, " + widget.userManager.username!;
@@ -39,7 +42,7 @@ class UserHomeWebState extends State<UserHomeWeb> {
                 fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
               )
           ),
-            body: UserHomeWebPage(widget.userManager, context),
+            body: BrowseChallengePage(widget.userManager, context),
             drawer: SideBar(widget.userManager),
         ),
     );

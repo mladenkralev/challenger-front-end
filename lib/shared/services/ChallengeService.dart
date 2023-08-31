@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/model/UserModel.dart';
 
 import 'package:http/http.dart' as http;
@@ -15,11 +15,11 @@ import '../model/AssignedChallenges.dart';
 
 class ChallengeService {
 
-  final userManager = locator<UserManager>();
+  final userManager = locator<UserManagerService>();
 
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
-  final _challengeDataController = StreamController<List<AssignedChallenges>>();
+  StreamController<List<AssignedChallenges>> _challengeDataController = StreamController<List<AssignedChallenges>>.broadcast();
   StompClient? stompClient;
 
   void upgradeProgressOfChallenge(int? challengeIndex) async {
@@ -43,11 +43,32 @@ class ChallengeService {
 
   }
 
+  void assignChallengeToCurrentUser(int? id, int? challengeIndex) async {
+    print("Assign challenge to user" + challengeIndex.toString());
+
+    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/challenges/' + id!.toString() +'/'+ challengeIndex.toString());
+    var token = userManager.user?.token;
+
+    print("Pressed " + usersUrl.toString());
+
+    final userResponse = await http.post(usersUrl,
+      headers: <String, String> {
+        'Authorization': 'Bearer $token',
+        'Access-Control-Allow-Origin': 'http://siteA.com',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    );
+
+    print("Response from assigning challenge " + userResponse.statusCode.toString());
+
+  }
+
   Stream<List<AssignedChallenges>> getUserChallenges(String token) {
 
     connectAndSubscribe(token!);
 
-    return _challengeDataController.stream;
+    return _challengeDataController.stream.asBroadcastStream();
   }
 
   Future<void> connectAndSubscribe(String token) async {
@@ -86,13 +107,13 @@ class ChallengeService {
     sendServerUpdate();
 
     Timer.periodic(
-      Duration(seconds: 30),
+      Duration(seconds: 2),
           (Timer t) => sendServerUpdate()
     );
   }
 
   void sendServerUpdate() {
-    print('Sending server an update ...');
+    // print('Sending server an update ...');
     stompClient?.send(
       destination: '/assigned',
       body: userManager.user?.email,

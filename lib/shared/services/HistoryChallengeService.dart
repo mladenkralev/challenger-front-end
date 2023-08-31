@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/model/HistoryChallenges.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:intl/intl.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
@@ -12,11 +12,11 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 import '../model/AssignedChallenges.dart';
 
 class HistoryChallengeService {
-  final userManager = locator<UserManager>();
+  final userManager = locator<UserManagerService>();
 
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
-  final _historyDataController = StreamController<List<HistoryChallenge>>();
+  StreamController<List<HistoryChallenge>> _historyDataController = StreamController<List<HistoryChallenge>>.broadcast();
   StompClient? stompClient;
 
   Stream<List<HistoryChallenge>> fetchHistoryData() {
@@ -28,8 +28,7 @@ class HistoryChallengeService {
     print("Pressed " + usersUrl.toString());
 
     connectAndSubscribe(token!);
-
-    return _historyDataController.stream;
+    return _historyDataController.stream.asBroadcastStream();
   }
 
   Future<void> connectAndSubscribe(String token) async {
@@ -68,7 +67,7 @@ class HistoryChallengeService {
     sendServerUpdate();
 
     Timer.periodic(
-        Duration(seconds: 30),
+        Duration(seconds: 2),
         (Timer t) => sendServerUpdate()
     );
   }

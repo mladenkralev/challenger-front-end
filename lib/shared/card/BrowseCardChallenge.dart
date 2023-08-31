@@ -1,15 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/card/HomeCardDetails.dart';
+import 'package:challenger/shared/card/BrowseCardDetails.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
-import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/services/AssetService.dart';
-import 'package:confetti/confetti.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-class HomeCardChallenge extends StatefulWidget {
+class BrowseCardChallenge extends StatefulWidget {
   final assetService = locator<AssetService>();
 
   bool collapsed = true;
@@ -19,16 +16,16 @@ class HomeCardChallenge extends StatefulWidget {
   Key key;
   final AssignedChallenges challenge;
 
-  HomeCardChallenge(this.key, this.challenge);
+  BrowseCardChallenge(this.key, this.challenge);
 
   @override
-  State<HomeCardChallenge> createState() => HomeCardChallengeState();
+  State<BrowseCardChallenge> createState() => BrowseCardChallengeState();
 }
 
 const loremIpsum =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
-class HomeCardChallengeState extends State<HomeCardChallenge> {
+class BrowseCardChallengeState extends State<BrowseCardChallenge> {
   double challengeProgress = 0;
   double pace = 0;
 
@@ -44,18 +41,17 @@ class HomeCardChallengeState extends State<HomeCardChallenge> {
       onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => HomeCardDetails(
-                  widget.challenge, widget.key))),
+              builder: (context) =>
+                  BrowseCardDetails(widget.challenge, widget.key))),
       child: Hero(
         tag: _specificCard +
             widget.challenge.id.toString() +
             widget.challenge.challengeModel!.id.toString(),
         child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(widget.cardRadius),
-          ),
-          child: getCard(widget.challenge.challengeModel!.id)
-        ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(widget.cardRadius),
+            ),
+            child: getCard(widget.challenge.challengeModel!.id)),
       ),
     );
   }
@@ -64,7 +60,7 @@ class HomeCardChallengeState extends State<HomeCardChallenge> {
 
   Widget getCard(int? id) {
     var url = BACKEND_AUTH_SERVICE + '/api/v1/blobs/' + id.toString();
-    print("Id: " + id.toString() + " Getting image" + id.toString());
+    // print("Getting image" + id.toString());
     CachedNetworkImage cachedNetworkImage = new CachedNetworkImage(
       imageUrl: url,
       imageBuilder: (context, imageProvider) => SizedBox(
@@ -94,7 +90,7 @@ class HomeCardChallengeState extends State<HomeCardChallenge> {
                   ),
                   title: Text(widget.challenge.challengeModel!.title!),
                   subtitle: Text(
-                    widget.challenge.challengeModel!.id.toString()!,
+                    'A sufficiently long subtitle warrants three lines.',
                     style: TextStyle(),
                   ),
                   trailing: Icon(Icons.done_outline_sharp),
@@ -106,7 +102,7 @@ class HomeCardChallengeState extends State<HomeCardChallenge> {
                 alignment: Alignment.topLeft,
                 padding: EdgeInsets.all(20),
                 child: Text(
-                  widget.challenge.challengeModel!.description!,
+                  loremIpsum,
                   style: TextStyle(),
                 ),
               ))

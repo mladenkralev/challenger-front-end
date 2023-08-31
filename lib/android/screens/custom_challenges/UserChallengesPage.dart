@@ -1,13 +1,13 @@
 import 'package:challenger/android/screens/custom_challenges/UserChallengeCard.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class UserChallengesPage extends StatefulWidget {
   static const String id = 'user_challenges_page';
-  UserManager user;
+  UserManagerService user;
 
   UserChallengesPage(this.user);
 

@@ -2,7 +2,7 @@ import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/card/ChallengeCard.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
-import 'package:challenger/shared/model/UserManager.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/services/ChallengeService.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 
@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class UserHome extends StatefulWidget {
-  final UserManager userManager;
+  final UserManagerService userManager;
 
   BuildContext context;
 
@@ -192,7 +192,7 @@ class CardCustomSlidableAction extends StatefulWidget {
     OccurrencesTransformer.transformToString(Occurrences.MONTH)
   ];
 
-  final UserManager userManager;
+  final UserManagerService userManager;
 
   int index;
 

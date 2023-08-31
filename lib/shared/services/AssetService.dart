@@ -1,26 +1,46 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/services/ChallengeService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../model/UserManager.dart';
+import 'UserManager.dart';
 
 class AssetService {
-  late UserManager userManager;
+  late UserManagerService userManager;
   final challengeService = locator<ChallengeService>();
 
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
 
-  Map<int,Image> inMemoryImages = {};
+  Map<int, Image> inMemoryImages = {};
 
-  ImageProvider getImage(int? id) {
-    if(inMemoryImages.containsKey(id)) {
-      return inMemoryImages[id]!.image;
-    }
-    Image image = Image.network(BACKEND_AUTH_SERVICE + '/api/v1/blobs/' + id.toString());
-    inMemoryImages.putIfAbsent(id!, () => image);
+  CachedNetworkImageProvider getImage(int? id) {
 
-    return image.image;
+    var url = BACKEND_AUTH_SERVICE + '/api/v1/blobs/' + id.toString();
+
+    // CachedNetworkImage cachedNetworkImage = new CachedNetworkImage(
+    //   imageUrl: url,
+    //   imageBuilder: (context, imageProvider) => Container(
+    //     height: 100,
+    //     width: 100,
+    //     decoration: new BoxDecoration(
+    //         image: new DecorationImage(
+    //           colorFilter: new ColorFilter.mode(
+    //               Colors.black.withOpacity(0.5), BlendMode.dstATop),
+    //           fit: BoxFit.cover,
+    //           image: imageProvider,
+    //         ),
+    //         borderRadius: BorderRadius.circular(25)),
+    //   ),
+    //   progressIndicatorBuilder: (context, url, downloadProgress) =>
+    //       CircularProgressIndicator(value: downloadProgress.progress),
+    // );
+    CachedNetworkImageProvider imageProvider = new CachedNetworkImageProvider(url);
+
+    return imageProvider;
+  }
+
+  Image getImageFromInMemory(int? id) {
+    return inMemoryImages[id]!;
   }
 }
-
