@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:challenger/DependencyInjection.dart';
+import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/model/UserModel.dart';
 
@@ -13,58 +14,15 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 
 import '../model/AssignedChallenges.dart';
 
-class ChallengeService {
+class BrowseChallengeService {
 
   final userManager = locator<UserManagerService>();
 
-  // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
-  StreamController<List<AssignedChallenges>> _challengeDataController = StreamController<List<AssignedChallenges>>.broadcast();
+  StreamController<List<ChallengeModel>> _challengeDataController = StreamController<List<ChallengeModel>>.broadcast();
   StompClient? stompClient;
 
-  void upgradeProgressOfChallenge(int? challengeIndex) async {
-    print("Updating progress of challenge with id" + challengeIndex.toString());
-    
-    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/challenges/' + challengeIndex.toString() + "/progress");
-    var token = userManager.user?.token;
-
-    print("Pressed " + usersUrl.toString());
-
-    final userResponse = await http.post(usersUrl,
-      headers: <String, String> {
-        'Authorization': 'Bearer $token',
-        'Access-Control-Allow-Origin': 'http://siteA.com',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    );
-
-    print("Response from progress update " + userResponse.statusCode.toString());
-
-  }
-
-  void assignChallengeToCurrentUser(int? id, int? challengeIndex) async {
-    print("Assign challenge to user" + challengeIndex.toString());
-
-    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/challenges/' + id!.toString() +'/'+ challengeIndex.toString());
-    var token = userManager.user?.token;
-
-    print("Pressed " + usersUrl.toString());
-
-    final userResponse = await http.post(usersUrl,
-      headers: <String, String> {
-        'Authorization': 'Bearer $token',
-        'Access-Control-Allow-Origin': 'http://siteA.com',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    );
-
-    print("Response from assigning challenge " + userResponse.statusCode.toString());
-
-  }
-
-  Stream<List<AssignedChallenges>> getUserChallenges(String token) {
+  Stream<List<ChallengeModel>> getBrowsableChallenges(String token) {
 
     connectAndSubscribe(token!);
 
@@ -87,14 +45,14 @@ class ChallengeService {
 
   void onConnectCallback(StompFrame connectFrame) {
     stompClient?.subscribe(
-        destination: '/assigned-response',
+        destination: '/challenges-response',
         headers: {},
         callback: (frame) {
           if (frame.body != null) {
             // Received a frame for this subscription
             String? body = frame.body;
             List<dynamic> assignedData = jsonDecode(body!);
-            List<AssignedChallenges> currentResult = getAssignedChallenges(assignedData);
+            List<ChallengeModel> currentResult = getBrowseChallenges(assignedData);
 
             _challengeDataController.add(currentResult);
             // for (HistoryChallenge item in currentResult!) {
@@ -115,24 +73,20 @@ class ChallengeService {
   void sendServerUpdate() {
     // print('Sending server an update ...');
     stompClient?.send(
-      destination: '/assigned',
+      destination: '/challenges',
       body: userManager.user?.email,
       headers: {},
     );
   }
 
-  List<AssignedChallenges> getAssignedChallenges(List<dynamic> assignedChallenges) {
-    List<AssignedChallenges> result = [];
+  List<ChallengeModel> getBrowseChallenges(List<dynamic> assignedChallenges) {
+    List<ChallengeModel> result = [];
     for (var item in assignedChallenges) {
       // Access individual items in the list using the 'item' variable
       // Perform operations or access properties of each item here
-      AssignedChallenges challenge = AssignedChallenges.fromJson(item);
+      ChallengeModel challenge = ChallengeModel.fromJson(item);
       result.add(challenge);
     }
     return result;
   }
-
-
-
-
 }

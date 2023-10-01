@@ -1,21 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:challenger/shared/services/ChallengeService.dart';
+import 'package:challenger/DependencyInjection.dart';
+import 'package:challenger/shared/model/AssignedChallenges.dart';
+import 'package:challenger/shared/services/AssetService.dart';
+import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/shared/services/HistoryChallengeService.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import '../../DependencyInjection.dart';
-import '../loading/CardDetails.dart';
-import '../model/AssignedChallenges.dart';
-import '../services/AssetService.dart';
-
 class HomeCardDetails extends StatelessWidget {
   final loginService = locator<AssetService>();
-  final challengeService = locator<ChallengeService>();
+  final challengeService = locator<AssignedChallengeService>();
   final historyService = locator<HistoryChallengeService>();
 
-  bool _isLoading = false;
   var _specificCard = "seeSpecificCard";
   double cardRadius = 20;
 

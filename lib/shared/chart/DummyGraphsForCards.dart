@@ -1,3 +1,6 @@
+import 'package:challenger/DependencyInjection.dart';
+import 'package:challenger/shared/model/StatisticsModel.dart';
+import 'package:challenger/shared/services/StatisticsService.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -11,8 +14,27 @@ class DummyGraphsForCards extends StatefulWidget {
 }
 
 class _DummyGraphsForCardsState extends State<DummyGraphsForCards> {
+  final statisticsService = locator<StatisticsService>();
+
+  StatisticsModel? statistics;
+  String? error;
+
+  @override
+  void initState() {
+    super.initState();
+    getStatistics();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (error != null) {
+      return Text('Error fetching data: $error');
+    }
+
+    if (statistics == null) {
+      return CircularProgressIndicator(); // Show a loader until data is fetched
+    }
+
     switch (widget.typeOfGraph) {
       case TypeOfGraph.PROGRESSIVE:
         return getProgressiveGraph();
@@ -20,6 +42,22 @@ class _DummyGraphsForCardsState extends State<DummyGraphsForCards> {
         return getRegressiveGraph();
       default:
         return getProgressiveGraph();
+    }
+  }
+
+  void getStatistics() async {
+    try {
+      statistics = await statisticsService.getUserStatistics();
+      if (statistics!.thisWeekAssigned! > statistics!.lastWeekAssigned!) {
+        widget.typeOfGraph = TypeOfGraph.PROGRESSIVE;
+      } else {
+        widget.typeOfGraph = TypeOfGraph.REGRESSIVE;
+      }
+      setState(() {});
+    } catch (error) {
+      this.error = error.toString();
+      print('Error fetching statistics: $error');
+      setState(() {});
     }
   }
 }
@@ -50,12 +88,12 @@ Widget getProgressiveGraph() {
           LineChartBarData(
             spots: [
               FlSpot(0, 1),
-              FlSpot(1, 3),
-              FlSpot(2, 4),
+              FlSpot(1, 1.5),
+              FlSpot(2, 2),
               FlSpot(3, 1),
               FlSpot(4, 2),
               FlSpot(5, 1.8),
-              FlSpot(6, 3),
+              FlSpot(6, 4),
             ],
             isCurved: true,
             color: Colors.blue,

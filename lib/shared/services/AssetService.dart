@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/services/ChallengeService.dart';
+import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -8,7 +8,7 @@ import 'UserManager.dart';
 
 class AssetService {
   late UserManagerService userManager;
-  final challengeService = locator<ChallengeService>();
+  final challengeService = locator<AssignedChallengeService>();
 
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
 

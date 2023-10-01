@@ -1,9 +1,8 @@
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/card/ChallengeCard.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
-import 'package:challenger/shared/model/ChallengeModel.dart';
+import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';
-import 'package:challenger/shared/services/ChallengeService.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 
 import 'package:flutter/material.dart';
@@ -208,7 +207,7 @@ class CardCustomSlidableAction extends StatefulWidget {
 }
 
 class _CardCustonSlidableActionState extends State<CardCustomSlidableAction> {
-  final ChallengeService challengeService = locator<ChallengeService>();
+  final AssignedChallengeService challengeService = locator<AssignedChallengeService>();
 
   @override
   Widget build(BuildContext context) {

@@ -1,27 +1,27 @@
 import 'dart:math';
 
 import 'package:calendar_view/calendar_view.dart';
-import 'package:challenger/shared/card/HomeCardChallenge.dart';
+import 'package:challenger/shared/card/home/HomeCard.dart';
 import 'package:challenger/shared/chart/CompletedChallengesChart.dart';
 import 'package:challenger/shared/chart/DummyGraphsForCards.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
+import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/model/HistoryChallenges.dart';
+import 'package:challenger/shared/services/AssignedChallengeService.dart';
+import 'package:challenger/shared/services/BrowseChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 import 'package:challenger/web/WebGlobalConstants.dart';
-import 'package:challenger/web/profile/AssignedChallenges.dart';
-import 'package:challenger/web/profile/ProfilePage.dart';
-import 'package:challenger/web/profile/pages/BrowseChallengePage.dart';
-import 'package:challenger/web/profile/pages/ChallengeTree.dart';
+import 'package:challenger/web/profile/BrowseChallengeRoot.dart';
+import 'package:challenger/web/profile/ComplatedChallengesRoot.dart';
 import 'package:confetti/confetti.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../DependencyInjection.dart';
-import '../../../shared/services/ChallengeService.dart';
 import '../../../shared/services/HistoryChallengeService.dart';
-import 'AssignedChallengesPage.dart';
+import '../AssignedChallengesRoot.dart';
 
 class UserHomeWebPage extends StatefulWidget {
   final UserManagerService userManager;
@@ -35,9 +35,10 @@ class UserHomeWebPage extends StatefulWidget {
 }
 
 class _UserHomeWebPageState extends State<UserHomeWebPage> {
-  final challengeService = locator<ChallengeService>();
+  final challengeService = locator<AssignedChallengeService>();
 
   final historyChallengeService = locator<HistoryChallengeService>();
+  final browseChallengeService = locator<BrowseChallengeService>();
 
   late ConfettiController _controllerCenterRight;
   late ConfettiController _controllerCenterLeft;
@@ -52,7 +53,7 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
   final occurrences = [Occurrences.DAY, Occurrences.WEEK, Occurrences.MONTH];
 
   List<AssignedChallenges> shownChallenges = List.empty(growable: true);
-  List<HomeCardChallenge> shownCards1 = List.empty(growable: true);
+  List<HomeCard> shownCards1 = List.empty(growable: true);
   Map<Occurrences, List<AssignedChallenges>> allChallenges = {};
 
   final double _padding = 32.0;
@@ -98,7 +99,10 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
   }
 
   Widget _getChallengesNew() {
-    double taskbarHeight = MediaQuery.of(context).size.height * 0.05;
+    double taskbarHeight = MediaQuery
+        .of(context)
+        .size
+        .height * 0.05;
 
     return Column(children: <Widget>[
       // First row
@@ -110,7 +114,12 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
               child: Padding(
                 padding: EdgeInsets.all(_padding),
                 child: Container(
-                  color: Colors.red,
+                  decoration: BoxDecoration(
+                    color: Colors.indigo, // Background color
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(_roundingRadius), // Rounding value here
+                    ),
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -122,12 +131,27 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildCard(context, "Assigned challenges",
-                              Icon(Icons.assignment_outlined)),
-                          _buildCard(context, "Completed challenges",
-                              Icon(Icons.done_all_outlined)),
-                          _buildCard(context, "New challenges",
-                              Icon(Icons.new_label_outlined)),
+                          _buildCard(
+                              context,
+                              "Assigned challenges",
+                              Icon(Icons.assignment_outlined),
+                              goToPageAssigned,
+                              getAssignedChallenges()
+                          ),
+                          _buildCard(
+                              context,
+                              "Completed challenges",
+                              Icon(Icons.done_all_outlined),
+                              goToPageCompleted,
+                              getHistoryChallenges()
+                          ),
+                          _buildCard(
+                              context,
+                              "New challenges",
+                              Icon(Icons.new_label_outlined),
+                              goToPageBrowse,
+                              getBrowseChallenges()
+                          ),
                         ],
                       ),
                       Expanded(
@@ -159,16 +183,16 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                   color: Colors.green,
                   child: Center(
                       child: Container(
-                    alignment: Alignment.topCenter,
-                    color: Colors.green,
-                    child: StreamBuilder<List<HistoryChallenge>>(
-                      stream: getHistoryChallenges(),
-                      // Call the function that fetches the data
-                      builder: (ctx, snapshot) {
-                        return _historyBuilder(ctx, snapshot);
-                      },
-                    ),
-                  )),
+                        alignment: Alignment.topCenter,
+                        color: Colors.green,
+                        child: StreamBuilder<List<HistoryChallenge>>(
+                          stream: getHistoryChallenges(),
+                          // Call the function that fetches the data
+                          builder: (ctx, snapshot) {
+                            return _historyBuilder(ctx, snapshot);
+                          },
+                        ),
+                      )),
                 ),
               ),
             ),
@@ -178,38 +202,45 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
       // Second row
       Expanded(
           child: Row(children: <Widget>[
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(_padding),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.indigo, // Background color
-                borderRadius: BorderRadius.all(
-                  Radius.circular(_roundingRadius), // Rounding value here
-                ),
-              ),
-              child: Container(child: CompletedChallengesChart()),
-            ),
-          ),
-        ),
-        Expanded(
-            child: Padding(
+            Expanded(
+              child: Padding(
                 padding: EdgeInsets.all(_padding),
                 child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.indigo, // Background color
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(_roundingRadius), // Rounding value here
-                      ),
+                  decoration: BoxDecoration(
+                    color: Colors.indigo, // Background color
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(_roundingRadius), // Rounding value here
                     ),
-                    child: _buildCalendar(context)))),
-      ]))
+                  ),
+                  child: Container(child: CompletedChallengesChart()),
+                ),
+              ),
+            ),
+            Expanded(
+                child: Padding(
+                    padding: EdgeInsets.all(_padding),
+                    child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.indigo, // Background color
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(
+                                _roundingRadius), // Rounding value here
+                          ),
+                        ),
+                        child: _buildCalendar(context)))),
+          ]))
     ]);
   }
 
   Widget _buildCalendar(BuildContext context) {
-    double cardsSizeHeight = MediaQuery.of(context).size.height * 0.5;
-    double cardsSizeWidth = MediaQuery.of(context).size.width * 0.5 * 0.85;
+    double cardsSizeHeight = MediaQuery
+        .of(context)
+        .size
+        .height * 0.5;
+    double cardsSizeWidth = MediaQuery
+        .of(context)
+        .size
+        .width * 0.5 * 0.85;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -268,9 +299,15 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     );
   }
 
-  Widget _buildCard(BuildContext context, String title, Icon icon) {
-    double cardsSizeHeight = MediaQuery.of(context).size.height * 0.5 * 0.5;
-    double cardsSizeWidth = MediaQuery.of(context).size.width * 0.6 * 0.3;
+  Widget _buildCard(BuildContext context, String title, Icon icon, Function nextPage, Stream<List<dynamic>>? chalenges) {
+    double cardsSizeHeight = MediaQuery
+        .of(context)
+        .size
+        .height * 0.5 * 0.5;
+    double cardsSizeWidth = MediaQuery
+        .of(context)
+        .size
+        .width * 0.6 * 0.3;
     print("sizeee " +
         cardsSizeHeight.toString() +
         " and " +
@@ -284,19 +321,19 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
       child: InkWell(
         onTap: () {
           // Navigate to the desired page
-          Get.to(
-            AssignedChallengesRoot(),
-            transition: Transition.zoom,
-          );
+          nextPage();
         },
         child: Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
             side: BorderSide(
-              color: Theme.of(context).colorScheme.outline,
+              color: Theme
+                  .of(context)
+                  .colorScheme
+                  .outline,
             ),
             borderRadius:
-                const BorderRadius.all(Radius.circular(_roundingRadius)),
+            const BorderRadius.all(Radius.circular(_roundingRadius)),
           ),
           child: Column(
             children: [
@@ -313,11 +350,11 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                         ),
                         title: Text(title),
                         subtitle: Text(DateTime.now().toString()),
-                        trailing: StreamBuilder<List<AssignedChallenges>>(
-                          stream: getShownChallenges(),
+                        trailing: StreamBuilder<List<dynamic>>(
+                          stream: chalenges,
                           // Call the function that fetches the data
                           builder: (ctx, snapshot) {
-                            return _assignedChallengesLength(ctx, snapshot);
+                            return _getStreamLentgth(ctx, snapshot);
                           },
                         ),
                       ),
@@ -377,6 +414,33 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     );
   }
 
+  Future? goToPageAssigned() {
+    Future? future = Get.to(
+      AssignedChallengesRoot(),
+      transition: Transition.noTransition,
+    );
+    print('Pressed');
+    return future;
+  }
+
+  Future? goToPageCompleted() {
+    Future? future = Get.to(
+      CompletedChallengesRoot(),
+      transition: Transition.noTransition,
+    );
+    print('Pressed');
+    return future;
+  }
+
+  Future? goToPageBrowse() {
+    Future? future = Get.to(
+      BrowseChallengeRoot(),
+      transition: Transition.noTransition,
+    );
+    print('Pressed');
+    return future;
+  }
+
   changeDisplayedChallenges(Occurrences selectedOccurrenceType) {
     currentlyDisplayed = selectedOccurrenceType;
     shownChallenges.clear();
@@ -385,18 +449,18 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     // listView = _buildViewableList();
   }
 
-  Future<List<AssignedChallenges>?> getUserChallenges() async {
-    return await widget.userManager.getAssignChallenges();
-  }
-
   Stream<List<HistoryChallenge>>? getHistoryChallenges() {
     this.historyChallenges =
         historyChallengeService.fetchHistoryData().asBroadcastStream();
     return historyChallenges?.asBroadcastStream();
   }
 
-  Stream<List<AssignedChallenges>>? getShownChallenges() {
+  Stream<List<AssignedChallenges>>? getAssignedChallenges() {
     return challengeService.getUserChallenges(widget.userManager.user!.token);
+  }
+
+  Stream<List<ChallengeModel>>? getBrowseChallenges() {
+    return browseChallengeService.getBrowsableChallenges(widget.userManager.user!.token);
   }
 
   Widget _historyBuilder(BuildContext context, AsyncSnapshot snapshot) {
@@ -414,9 +478,9 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     if (snapshot.data!.isEmpty) {
       return Center(
           child: Text(
-        "No history data detected",
-        style: TextStyle(fontSize: WebGlobalConstants.h1Size),
-      ));
+            "No history data detected",
+            style: TextStyle(fontSize: WebGlobalConstants.h1Size),
+          ));
     }
 
     // Use the fetched data to populate the ListView
@@ -431,7 +495,8 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
               child: Icon(Icons.check),
             ),
             title: Text(
-                '${snapshot.data?[index].assignedChallenges?.challengeModel?.title}'),
+                '${snapshot.data?[index].assignedChallenges?.challengeModel
+                    ?.title}'),
             subtitle: Text('${snapshot.data?[index].progressDate}'),
           ),
         );
@@ -439,8 +504,8 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     );
   }
 
-  Widget _assignedChallengesLength(
-      BuildContext context, AsyncSnapshot snapshot) {
+  Widget _getStreamLentgth(BuildContext context,
+      AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
       return Padding(
         padding: EdgeInsets.fromLTRB(0, 0, 16, 0),

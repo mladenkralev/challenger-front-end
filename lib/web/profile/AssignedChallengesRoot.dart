@@ -26,7 +26,7 @@ class AssignedChallengesRootState extends State<AssignedChallengesRoot> {
       child: Scaffold(
         appBar: AppBar(
             title: Text(
-              "asd",
+              "Assigned Challenges",
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             backgroundColor: Theme.of(context).primaryColor,

@@ -1,37 +1,31 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:challenger/shared/model/ChallengeModel.dart';
+import 'package:challenger/DependencyInjection.dart';
+import 'package:challenger/shared/model/HistoryChallenges.dart';
+import 'package:challenger/shared/services/AssetService.dart';
 import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/shared/services/HistoryChallengeService.dart';
-import 'package:challenger/shared/services/UserManager.dart';
-import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import '../../DependencyInjection.dart';
-import '../loading/CardDetails.dart';
-import '../model/AssignedChallenges.dart';
-import '../services/AssetService.dart';
-
-class BrowseCardDetails extends StatelessWidget {
+class CompletedCardDetails extends StatelessWidget {
   final loginService = locator<AssetService>();
   final challengeService = locator<AssignedChallengeService>();
   final historyService = locator<HistoryChallengeService>();
-  final userManagerService = locator<UserManagerService>();
 
   var _specificCard = "seeSpecificCard";
   double cardRadius = 20;
 
-  final ChallengeModel _challenge;
+  final HistoryChallenge _challenge;
   Key key;
 
-  BrowseCardDetails(this._challenge, this.key);
+  CompletedCardDetails(this._challenge, this.key);
 
   @override
   Widget build(BuildContext context) {
     return Hero(
         tag: _specificCard +
-            _challenge.id.toString() +
-            _challenge.id.toString(),
+            _challenge.assignedChallenges!.id.toString() +
+            _challenge.assignedChallenges!.challengeModel!.id.toString(),
         child: Center(
           child: SizedBox(
             width: 800,
@@ -46,8 +40,8 @@ class BrowseCardDetails extends StatelessWidget {
                     image: new DecorationImage(
                       colorFilter: new ColorFilter.mode(
                           Colors.black.withOpacity(0.5), BlendMode.dstATop),
-                      image: loginService
-                          .getImage(_challenge.blob?.id),
+                      image: loginService.getImage(_challenge
+                          .assignedChallenges!.challengeModel?.blob?.id),
                       fit: BoxFit.cover,
                     ),
                     borderRadius: BorderRadius.circular(cardRadius)),
@@ -63,7 +57,7 @@ class BrowseCardDetails extends StatelessWidget {
                           center: new Text("1"),
                           progressColor: Colors.red,
                         ),
-                        title: Text(_challenge.title!),
+                        title: Text(_challenge.assignedChallenges!.challengeModel!.title!),
                         subtitle: Text(
                           'A sufficiently long subtitle warrants three lines.',
                           style: TextStyle(),
@@ -89,9 +83,10 @@ class BrowseCardDetails extends StatelessWidget {
                           style: TextButton.styleFrom(
                             textStyle: const TextStyle(fontSize: 20),
                           ),
-                          child: const Text('ACCEPT CHALLENGE'),
+                          child: const Text('DONE'),
                           onPressed: () {
-                            challengeService.assignChallengeToCurrentUser(userManagerService.user!.id, _challenge.id);
+                            challengeService
+                                .upgradeProgressOfChallenge(_challenge.assignedChallenges!.id);
                             historyService.sendServerUpdate();
                             challengeService.sendServerUpdate();
                             Navigator.pop(context);

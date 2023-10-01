@@ -1,16 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/card/HomeCardDetails.dart';
+import 'package:challenger/shared/card/home/HomeCardDetails.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
-import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/services/AssetService.dart';
-import 'package:confetti/confetti.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-class HomeCardChallenge extends StatefulWidget {
+class HomeCard extends StatefulWidget {
   final assetService = locator<AssetService>();
+
+  double width;
+  double height;
 
   bool collapsed = true;
   double cardRadius = 20;
@@ -19,16 +19,16 @@ class HomeCardChallenge extends StatefulWidget {
   Key key;
   final AssignedChallenges challenge;
 
-  HomeCardChallenge(this.key, this.challenge);
+  HomeCard(this.key, this.challenge, this.width, this.height);
 
   @override
-  State<HomeCardChallenge> createState() => HomeCardChallengeState();
+  State<HomeCard> createState() => HomeCardState();
 }
 
 const loremIpsum =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
-class HomeCardChallengeState extends State<HomeCardChallenge> {
+class HomeCardState extends State<HomeCard> {
   double challengeProgress = 0;
   double pace = 0;
 
@@ -50,11 +50,13 @@ class HomeCardChallengeState extends State<HomeCardChallenge> {
         tag: _specificCard +
             widget.challenge.id.toString() +
             widget.challenge.challengeModel!.id.toString(),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(widget.cardRadius),
+        child: Container(
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(widget.cardRadius),
+            ),
+            child: getCard(widget.challenge.challengeModel!.id)
           ),
-          child: getCard(widget.challenge.challengeModel!.id)
         ),
       ),
     );
@@ -63,16 +65,15 @@ class HomeCardChallengeState extends State<HomeCardChallenge> {
   static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
 
   Widget getCard(int? id) {
+    print("New invocation of getCard" + widget.width.toString() + " " + widget.height.toString());
     var url = BACKEND_AUTH_SERVICE + '/api/v1/blobs/' + id.toString();
     print("Id: " + id.toString() + " Getting image" + id.toString());
     CachedNetworkImage cachedNetworkImage = new CachedNetworkImage(
       imageUrl: url,
       imageBuilder: (context, imageProvider) => SizedBox(
-        width: 300,
-        height: 300,
+        width: widget.width,
+        height: widget.height,
         child: Container(
-          height: 100,
-          width: 100,
           decoration: new BoxDecoration(
               image: new DecorationImage(
                 colorFilter: new ColorFilter.mode(

@@ -1,8 +1,9 @@
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/card/BrowseCardChallenge.dart';
-import 'package:challenger/shared/card/HomeCardChallenge.dart';
+import 'package:challenger/shared/model/ChallengeModel.dart';
+import 'package:challenger/shared/services/AssignedChallengeService.dart';
+import 'package:challenger/shared/services/BrowseChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';
-import 'package:challenger/shared/services/ChallengeService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -20,59 +21,50 @@ class BrowseChallengePage extends StatefulWidget {
 }
 
 class _BrowseChallengePageState extends State<BrowseChallengePage> {
-  final challengeService = locator<ChallengeService>();
+  final challengeService = locator<BrowseChallengeService>();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                height: 300,
-                child: Container(
-                  child: StreamBuilder<List<AssignedChallenges>>(
-                    stream: getShownChallenges(),
-                    // should return a Stream<List<AssignedChallenges>>
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator(); // Loading indicator while data is loading
-                      } else if (snapshot.hasError) {
-                        return Text(
-                            'Error: ${snapshot.error}'); // Error message in case of error
-                      } else {
-                        if (snapshot.hasData && snapshot.data != null) {
-                          snapshot.data?.sort((a, b) => a.challengeModel!.title!
-                              .compareTo(b.challengeModel!.title!));
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: snapshot.data!.length,
-                            itemBuilder: (context, index) {
-                              final AssignedChallenges challenge =
-                                  snapshot.data![index];
-                              return _getCard(challenge, index);
-                            },
-                          );
-                        } else {
-                          return Text(
-                              'No data'); // In case no data is available
-                        }
-                      }
-                    },
+    return Container(
+      child: StreamBuilder<List<ChallengeModel>>(
+        stream: getShownChallenges(),
+        // should return a Stream<List<AssignedChallenges>>
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator(); // Loading indicator while data is loading
+          } else if (snapshot.hasError) {
+            return Text(
+                'Error: ${snapshot.error}'); // Error message in case of error
+          } else {
+            if (snapshot.hasData && snapshot.data != null) {
+              snapshot.data?.sort((a, b) =>
+                  a!.title!.compareTo(b.title!));
+              return Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5, // 4 cards in a row
+                    childAspectRatio: 1, // Aspect ratio
+                    mainAxisSpacing: 32, // Spacing between rows
+                    crossAxisSpacing: 32, // Spacing between columns
                   ),
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, index) {
+                    final ChallengeModel challenge = snapshot.data![index];
+                    return _getCard(challenge, index);
+                  },
                 ),
-              )
-            ],
-          ),
-        )
-      ],
+              );
+            } else {
+              return Text('No data'); // In case no data is available
+            }
+          }
+        },
+      ),
     );
   }
 
-  Widget _getCard(AssignedChallenges challenge, int index) {
+  Widget _getCard(ChallengeModel challenge, int index) {
     // add key for updating
     Key cardKey = new Key(index.toString());
 
@@ -84,7 +76,7 @@ class _BrowseChallengePageState extends State<BrowseChallengePage> {
     return browseCard;
   }
 
-  Stream<List<AssignedChallenges>>? getShownChallenges() {
-    return challengeService.getUserChallenges(widget.userManager.user!.token);
+  Stream<List<ChallengeModel>>? getShownChallenges() {
+    return challengeService.getBrowsableChallenges(widget.userManager.user!.token);
   }
 }

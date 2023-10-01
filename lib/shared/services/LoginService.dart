@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/android/screens/user/profile/UserHomePage.dart';
 import 'package:challenger/shared/model/UserModel.dart';
-import 'package:challenger/shared/services/ChallengeService.dart';
+import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/web/profile/UserHomeWeb.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -15,7 +15,7 @@ import 'UserManager.dart';
 import 'AssetService.dart';
 
 class LoginService {
-  final challengeService = locator<ChallengeService>();
+  final challengeService = locator<AssignedChallengeService>();
   final assetService = locator<AssetService>();
 
   late UserManagerService userManager;

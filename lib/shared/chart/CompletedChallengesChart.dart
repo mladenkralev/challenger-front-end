@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/HistoryChallenges.dart';
-import 'package:challenger/shared/services/ChallengeService.dart';
+import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/shared/services/HistoryChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -20,7 +20,7 @@ class CompletedChallengesChart extends StatefulWidget {
 
 class BarChartSample2State extends State<CompletedChallengesChart> {
   final historyService = locator<HistoryChallengeService>();
-  final challengeService = locator<ChallengeService>();
+  final challengeService = locator<AssignedChallengeService>();
   final userService = locator<UserManagerService>();
 
   StreamSubscription<List<HistoryChallenge>>? _historySubscription;

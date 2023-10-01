@@ -1,3 +1,4 @@
+import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
@@ -10,19 +11,16 @@ import 'package:flutter/material.dart';
 
 import 'pages/ChallengeTree.dart';
 
-class BrowseChallenge extends StatefulWidget {
+class BrowseChallengeRoot extends StatefulWidget {
   static const String id = 'user_profile_page';
 
-  // User user
-  UserManagerService userManager;
-
-  BrowseChallenge(this.userManager);
+  UserManagerService userManager = locator<UserManagerService>();
 
   @override
-  BrowseChallengeState createState() => BrowseChallengeState();
+  BrowseChallengeRootState createState() => BrowseChallengeRootState();
 }
 
-class BrowseChallengeState extends State<BrowseChallenge> {
+class BrowseChallengeRootState extends State<BrowseChallengeRoot> {
   Occurrences currentlyDisplayed = Occurrences.DAY;
 
   String getUserGreeting() =>  "Good day, " + widget.userManager.username!;
