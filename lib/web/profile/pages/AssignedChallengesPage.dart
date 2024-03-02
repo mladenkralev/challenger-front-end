@@ -1,5 +1,5 @@
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/card/home/HomeCard.dart';
+import 'package:challenger/shared/card/home/AssignedCard.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';
@@ -65,8 +65,8 @@ class AssignedChallengesPage extends StatelessWidget {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     // remember the card for clear and adding again
-    HomeCard challengeCard =
-        new HomeCard(cardKey, challenge, width/8 , height/3);
+    AssignedCard challengeCard =
+        new AssignedCard(cardKey, challenge, width/8 , height/3);
 
     // wrap with slidable
     return challengeCard;

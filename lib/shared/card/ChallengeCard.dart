@@ -77,28 +77,7 @@ class ChallengeCardState extends State<ChallengeCard> {
           borderRadius: BorderRadius.circular(cardRadius),
         ),
         borderOnForeground: true,
-        child: getCard(widget.challenge.challengeModel?.id),
-        // Column(children: [
-
-        // Flexible(
-        //     flex: 1,
-        //     child: ListTile(
-        //       leading: new CircularPercentIndicator(
-        //         radius: 45.0,
-        //         lineWidth: 4.0,
-        //         percent: double.parse((challengeProgress).toStringAsFixed(1)),
-        //         center: new Text(challengeProgress.toStringAsFixed(1)),
-        //         progressColor: Colors.red,
-        //       ),
-        //       title: Text(widget.challenge.challengeModel!.title!),
-        //       subtitle: Text(
-        //         'A sufficiently long subtitle warrants three lines.',
-        //         style: TextStyle(),
-        //       ),
-        //       trailing: Icon(Icons.done_outline_sharp),
-        //       isThreeLine: true,
-        //     ))
-        // ]));
+        child: getCard(widget.challenge.challengeModel?.id)
     );
   }
 

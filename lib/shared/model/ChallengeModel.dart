@@ -1,17 +1,18 @@
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
-import 'package:intl/intl.dart';
 
 class ChallengeModel {
   int? id;
   String? title;
   String? description;
+  String? shortDescription;
   Occurrences? occurrences;
   NetworkBlob? blob;
 
-  ChallengeModel(int id, String title, String description, Occurrences occurrences, NetworkBlob blob) {
+  ChallengeModel(int id, String title, String description, String shortDescription, Occurrences occurrences, NetworkBlob blob) {
     this.id = id;
     this.title = title;
     this.description = description;
+    this.shortDescription = shortDescription;
     this.occurrences = occurrences;
     this.blob = blob;
   }
@@ -21,6 +22,7 @@ class ChallengeModel {
         json['id'],
         json['title'],
         json['description'],
+        json['shortDescription'],
         OccurrencesTransformer.getEnumOccurrences(json['occurrences']),
         getNetworkBlob(json['streamingFileRecord'])
     );
@@ -33,6 +35,7 @@ class ChallengeModel {
                 element['id'],
                 element['title'],
                 element['description'],
+                element['shortDescription'],
                 OccurrencesTransformer.getEnumOccurrences(element['occurrences']),
                 getNetworkBlob(element['streamingFileRecord'])
       );

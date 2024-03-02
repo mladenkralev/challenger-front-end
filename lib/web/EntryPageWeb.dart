@@ -34,9 +34,23 @@ class _EntryPageWebState extends State<EntryPageWeb> {
             primaryColor: WebGlobalConstants.primaryColor,
             colorScheme: WebGlobalConstants.colorScheme,
             backgroundColor: WebGlobalConstants.backgroundColor,
-            textTheme: GoogleFonts.mulishTextTheme().apply(
-                bodyColor: Colors.black
-            ),
+            textTheme: GoogleFonts.montserratTextTheme(
+              TextTheme(
+                displayLarge: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: WebGlobalConstants.h1Size
+                ), // Used for the largest text in Material 3
+                bodyLarge: TextStyle(
+                    color: Colors.black,
+                    fontSize: WebGlobalConstants.h1Size
+                ), // Used for large body text in Material 3
+                bodyMedium: TextStyle(
+                    color: Colors.black,
+                    fontSize: WebGlobalConstants.h2Size
+                ),
+              ),
+            ).apply(bodyColor: Colors.black), // Applying black as the default body color
             pageTransitionsTheme: PageTransitionsTheme(
                 builders: {
                   TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),

@@ -1,13 +1,9 @@
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/card/BrowseCardChallenge.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
-import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/shared/services/BrowseChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
-import '../../../shared/model/AssignedChallenges.dart';
 
 class BrowseChallengePage extends StatefulWidget {
   final UserManagerService userManager;
@@ -37,8 +33,7 @@ class _BrowseChallengePageState extends State<BrowseChallengePage> {
                 'Error: ${snapshot.error}'); // Error message in case of error
           } else {
             if (snapshot.hasData && snapshot.data != null) {
-              snapshot.data?.sort((a, b) =>
-                  a!.title!.compareTo(b.title!));
+              snapshot.data?.sort((a, b) => a!.title!.compareTo(b.title!));
               return Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: GridView.builder(
@@ -68,15 +63,19 @@ class _BrowseChallengePageState extends State<BrowseChallengePage> {
     // add key for updating
     Key cardKey = new Key(index.toString());
 
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
+
     // remember the card for clear and adding again
     BrowseCardChallenge browseCard =
-        new BrowseCardChallenge(cardKey, challenge);
+        new BrowseCardChallenge(cardKey, challenge, width / 8, height / 3);
 
     // wrap with slidable
     return browseCard;
   }
 
   Stream<List<ChallengeModel>>? getShownChallenges() {
-    return challengeService.getBrowsableChallenges(widget.userManager.user!.token);
+    return challengeService
+        .getBrowsableChallenges(widget.userManager.user!.token);
   }
 }

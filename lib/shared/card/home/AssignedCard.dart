@@ -1,13 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/card/completed/CompletedCardDetails.dart';
-import 'package:challenger/shared/model/HistoryChallenges.dart';
+import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/services/AssetService.dart';
 import 'package:challenger/web/WebGlobalConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-class CompletedCard extends StatefulWidget {
+import 'AssignedCardDetails.dart';
+
+class AssignedCard extends StatefulWidget {
   final assetService = locator<AssetService>();
 
   double width;
@@ -18,18 +19,15 @@ class CompletedCard extends StatefulWidget {
   double challengeProgress = 0;
 
   Key key;
-  final HistoryChallenge challenge;
+  final AssignedChallenges challenge;
 
-  CompletedCard(this.key, this.challenge, this.width, this.height);
+  AssignedCard(this.key, this.challenge, this.width, this.height);
 
   @override
-  State<CompletedCard> createState() => CompletedCardState();
+  State<AssignedCard> createState() => AssignedCardState();
 }
 
-const loremIpsum =
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-
-class CompletedCardState extends State<CompletedCard> {
+class AssignedCardState extends State<AssignedCard> {
   double challengeProgress = 0;
   double pace = 0;
 
@@ -37,23 +35,26 @@ class CompletedCardState extends State<CompletedCard> {
 
   @override
   Widget build(BuildContext context) {
+    challengeProgress = pace *
+        (widget.challenge.maxProgress! - widget.challenge.currentProgress!);
+    pace = 100 / widget.challenge.maxProgress!;
+
     return InkWell(
       onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  CompletedCardDetails(widget.challenge, widget.key))),
+                  AssignedCardDetails(widget.challenge, widget.key))),
       child: Hero(
         tag: _specificCard +
-            widget.challenge.assignedChallenges!.id.toString() +
-            widget.challenge.assignedChallenges!.challengeModel!.id.toString(),
+            widget.challenge.id.toString() +
+            widget.challenge.challengeModel!.id.toString(),
         child: Container(
           child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(widget.cardRadius),
               ),
-              child: getCard(
-                  widget.challenge.assignedChallenges!.challengeModel!.id)),
+              child: getCard(widget.challenge.challengeModel!.id)),
         ),
       ),
     );
@@ -96,7 +97,7 @@ class CompletedCardState extends State<CompletedCard> {
                   progressColor: Colors.red,
                 ),
                 title: Text(
-                  widget.challenge.assignedChallenges!.challengeModel!.title!,
+                  widget.challenge.challengeModel!.title!,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: WebGlobalConstants.hardBlack,
@@ -109,7 +110,7 @@ class CompletedCardState extends State<CompletedCard> {
                   ),
                 ),
                 subtitle: Text(
-                  widget.challenge.assignedChallenges!.challengeModel!.description!,
+                  widget.challenge.challengeModel!.shortDescription!,
                   style: TextStyle(
                     color: WebGlobalConstants.secondBlack,
                   ),
@@ -121,7 +122,7 @@ class CompletedCardState extends State<CompletedCard> {
             Padding(
               padding: EdgeInsets.all(36),
               child: Text(
-                widget.challenge.assignedChallenges!.challengeModel!.shortDescription!,
+                widget.challenge.challengeModel!.description!,
                 style: TextStyle(
                   color: WebGlobalConstants.secondBlack,
                 ),
@@ -161,8 +162,7 @@ class CompletedCardState extends State<CompletedCard> {
       child: Text(
         label,
         style: TextStyle(
-            color: WebGlobalConstants.primaryColor,
-            fontSize: WebGlobalConstants.tagSize),
+            color: WebGlobalConstants.primaryColor, fontSize: WebGlobalConstants.tagSize),
       ),
     );
   }

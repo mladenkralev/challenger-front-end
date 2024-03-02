@@ -1,7 +1,8 @@
 import 'dart:math';
 
-import 'package:calendar_view/calendar_view.dart';
-import 'package:challenger/shared/card/home/HomeCard.dart';
+import 'package:challenger/shared/calendar/HomeCalendar.dart';
+import 'package:challenger/shared/card/SummaryHomePageCard.dart';
+import 'package:challenger/shared/card/home/AssignedCard.dart';
 import 'package:challenger/shared/chart/CompletedChallengesChart.dart';
 import 'package:challenger/shared/chart/DummyGraphsForCards.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
@@ -53,7 +54,7 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
   final occurrences = [Occurrences.DAY, Occurrences.WEEK, Occurrences.MONTH];
 
   List<AssignedChallenges> shownChallenges = List.empty(growable: true);
-  List<HomeCard> shownCards1 = List.empty(growable: true);
+  List<AssignedCard> shownCards1 = List.empty(growable: true);
   Map<Occurrences, List<AssignedChallenges>> allChallenges = {};
 
   final double _padding = 32.0;
@@ -131,22 +132,19 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildCard(
-                              context,
+                          SummaryHomePageCard(
                               "Assigned challenges",
                               Icon(Icons.assignment_outlined),
                               goToPageAssigned,
                               getAssignedChallenges()
                           ),
-                          _buildCard(
-                              context,
+                          SummaryHomePageCard(
                               "Completed challenges",
                               Icon(Icons.done_all_outlined),
                               goToPageCompleted,
                               getHistoryChallenges()
                           ),
-                          _buildCard(
-                              context,
+                          SummaryHomePageCard(
                               "New challenges",
                               Icon(Icons.new_label_outlined),
                               goToPageBrowse,
@@ -227,191 +225,9 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                                 _roundingRadius), // Rounding value here
                           ),
                         ),
-                        child: _buildCalendar(context)))),
+                        child: HomeCalendar()))),
           ]))
     ]);
-  }
-
-  Widget _buildCalendar(BuildContext context) {
-    double cardsSizeHeight = MediaQuery
-        .of(context)
-        .size
-        .height * 0.5;
-    double cardsSizeWidth = MediaQuery
-        .of(context)
-        .size
-        .width * 0.5 * 0.85;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      child: Container(
-        width: cardsSizeWidth,
-        height: cardsSizeHeight,
-        color: Colors.indigo,
-        child: Padding(
-          padding: EdgeInsets.all(_padding),
-          child: Container(
-            child: Center(
-                child: CalendarControllerProvider(
-                    controller: EventController(),
-                    child: MonthView(
-                      controller: EventController(),
-                      // to provide custom UI for month cells.
-                      cellBuilder: (date, events, isToday, isInMonth) {
-                        // Return your widget to display as month cell.
-                        if (isToday) {
-                          return Container(
-                            color: Colors.blueAccent,
-                          );
-                        }
-                        if (!isInMonth) {
-                          return Container(
-                            color: Colors.white24,
-                          );
-                        }
-                        return Container();
-                      },
-                      headerBuilder: (date) {
-                        return Container(
-                          color: Colors.redAccent,
-                        );
-                      },
-                      minMonth: DateTime(1990),
-                      maxMonth: DateTime(2050),
-                      initialMonth: DateTime.now(),
-                      width: cardsSizeWidth,
-                      cellAspectRatio: 3,
-                      onPageChange: (date, pageIndex) =>
-                          print("$date, $pageIndex"),
-                      onCellTap: (events, date) {
-                        // Implement callback when user taps on a cell.
-                        print(events);
-                      },
-                      startDay: WeekDays.sunday,
-                      // To change the first day of the week.
-                      // This callback will only work if cellBuilder is null.
-                      onEventTap: (event, date) => print(event),
-                      onDateLongPress: (date) => print(date),
-                    ))),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCard(BuildContext context, String title, Icon icon, Function nextPage, Stream<List<dynamic>>? chalenges) {
-    double cardsSizeHeight = MediaQuery
-        .of(context)
-        .size
-        .height * 0.5 * 0.5;
-    double cardsSizeWidth = MediaQuery
-        .of(context)
-        .size
-        .width * 0.6 * 0.3;
-    print("sizeee " +
-        cardsSizeHeight.toString() +
-        " and " +
-        cardsSizeWidth.toString());
-
-    final double _paddingText = 4.0;
-    final double _paddingRightText = 4.0;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      child: InkWell(
-        onTap: () {
-          // Navigate to the desired page
-          nextPage();
-        },
-        child: Card(
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(
-              color: Theme
-                  .of(context)
-                  .colorScheme
-                  .outline,
-            ),
-            borderRadius:
-            const BorderRadius.all(Radius.circular(_roundingRadius)),
-          ),
-          child: Column(
-            children: [
-              // Allocate fixed space for Text
-              Row(children: [
-                SizedBox(
-                  width: cardsSizeWidth,
-                  height: cardsSizeHeight,
-                  child: Column(
-                    children: [
-                      ListTile(
-                        leading: CircleAvatar(
-                          child: icon,
-                        ),
-                        title: Text(title),
-                        subtitle: Text(DateTime.now().toString()),
-                        trailing: StreamBuilder<List<dynamic>>(
-                          stream: chalenges,
-                          // Call the function that fetches the data
-                          builder: (ctx, snapshot) {
-                            return _getStreamLentgth(ctx, snapshot);
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: const Divider(
-                          height: 1,
-                          thickness: 1,
-                          indent: 20,
-                          endIndent: 20,
-                          color: Colors.black26,
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                              width: cardsSizeWidth * 0.7,
-                              height: cardsSizeHeight / 2,
-                              child: Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                      _paddingText, 0, 8, _padding),
-                                  child: DummyGraphsForCards(
-                                      TypeOfGraph.REGRESSIVE))),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            // align text to the left
-                            children: [
-                              Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
-                                  child: Text(
-                                    "10% more",
-                                    style: TextStyle(
-                                        fontSize: WebGlobalConstants.h1Size),
-                                  )),
-                              Padding(
-                                padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
-                                child: Text(
-                                  "from last week",
-                                  style: TextStyle(
-                                      fontSize: WebGlobalConstants.h1Size),
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              ]),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Future? goToPageAssigned() {
@@ -504,19 +320,5 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     );
   }
 
-  Widget _getStreamLentgth(BuildContext context,
-      AsyncSnapshot snapshot) {
-    if (snapshot.hasData) {
-      return Padding(
-        padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
-        child: Text(
-          '${snapshot.data!.length}',
-          style: TextStyle(fontSize: WebGlobalConstants.titleSize),
-        ),
-      );
-    } else if (snapshot.hasError) {
-      return Text('Error: ${snapshot.error}');
-    }
-    return CircularProgressIndicator();
-  }
+
 }
