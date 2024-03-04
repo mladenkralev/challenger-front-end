@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 
 class DummyGraphsForCards extends StatefulWidget {
   TypeOfGraph typeOfGraph;
+  double chartWidth;
+  double chartHeight;
 
-  DummyGraphsForCards(this.typeOfGraph);
+  DummyGraphsForCards(this.typeOfGraph, this.chartWidth, this.chartHeight);
 
   @override
   State<DummyGraphsForCards> createState() => _DummyGraphsForCardsState();
@@ -35,14 +37,23 @@ class _DummyGraphsForCardsState extends State<DummyGraphsForCards> {
       return CircularProgressIndicator(); // Show a loader until data is fetched
     }
 
+    Widget progressiveGraph;
     switch (widget.typeOfGraph) {
       case TypeOfGraph.PROGRESSIVE:
-        return getProgressiveGraph();
+        progressiveGraph = getProgressiveGraph();
+        break;
       case TypeOfGraph.REGRESSIVE:
-        return getRegressiveGraph();
+        progressiveGraph = getRegressiveGraph();
+        break;
       default:
-        return getProgressiveGraph();
+        progressiveGraph = getProgressiveGraph();
     }
+
+    return SizedBox(
+      width: widget.chartWidth,
+      height: widget.chartHeight,
+      child: progressiveGraph,
+    );
   }
 
   void getStatistics() async {

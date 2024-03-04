@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/card/BrowseCardDetails.dart';
@@ -49,21 +51,43 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(widget.cardRadius),
               ),
-              child: getCard(widget.challenge.id)),
+              child: _getCard(widget.challenge.id)),
         ),
       ),
     );
   }
 
-  static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
+  Widget _getCard(int? id) {
+    var url = AssetService.HTTP_BACKEND_SERVICE +
+        AssetService.ASSET_SUFFIX +
+        id.toString();
+    print("Id: " +
+        id.toString() +
+        " Getting image " +
+        id.toString() +
+        " from " +
+        url);
 
-  Widget getCard(int? id) {
-    print("New invocation of getCard" +
-        widget.width.toString() +
-        " " +
-        widget.height.toString());
-    var url = BACKEND_AUTH_SERVICE + '/api/v1/blobs/' + id.toString();
-    print("Id: " + id.toString() + " Getting image" + id.toString());
+    const double baseScreenWidth = 1024.0;
+    const double basePadding = 24.0;
+    const double baseTextSize = 20.0;
+
+    double screenWidth = MediaQuery.of(context).size.width;
+    const double maxScaleFactor = 1.5; // Adjust this value as needed
+    double scale = min(screenWidth / baseScreenWidth, maxScaleFactor);
+
+    // Calculate the dynamic padding
+    double minPadding = 8.0;
+    double dynamicPadding =
+        max(24.0 * scale, 8.0); // Ensures padding is not less than 8.0
+    double dynamicTextSize = max(
+        baseTextSize * scale, 12.0); // Ensures text size is not less than 12.0
+
+    print("Width: " + widget.width.toString());
+    print("Height: " + widget.height.toString());
+    print("Scale: " + scale.toString());
+    print("Dynamic padding: " + dynamicPadding.toString());
+    print("Dynamic textSize: " + dynamicTextSize.toString());
 
     return CachedNetworkImage(
       imageUrl: url,
@@ -82,7 +106,7 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.all(dynamicPadding),
               child: ListTile(
                 leading: CircularPercentIndicator(
                   radius: 20.0,
@@ -96,6 +120,7 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: WebGlobalConstants.hardBlack,
+                    fontSize: dynamicTextSize,
                     shadows: [
                       Shadow(
                           blurRadius: 1.0,
@@ -107,6 +132,7 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
                 subtitle: Text(
                   widget.challenge.description!,
                   style: TextStyle(
+                    fontSize: dynamicTextSize - 2,
                     color: WebGlobalConstants.secondBlack,
                   ),
                 ),
@@ -115,10 +141,12 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(36),
+              padding: EdgeInsets.only(
+                  right: dynamicPadding * 2, left: dynamicPadding * 2),
               child: Text(
                 widget.challenge.shortDescription!,
                 style: TextStyle(
+                  fontSize: dynamicTextSize - 2,
                   color: WebGlobalConstants.secondBlack,
                 ),
               ),
@@ -130,11 +158,11 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  buildTag('Strength', Colors.red),
+                  buildTag('Strength', Colors.red, dynamicTextSize - 2),
                   SizedBox(width: 8), // Spacing between tags
-                  buildTag('Weekly', Colors.green),
+                  buildTag('Weekly', Colors.green, dynamicTextSize - 2),
                   SizedBox(width: 8), // Spacing between tags
-                  buildTag('Easy', Colors.blue),
+                  buildTag('Easy', Colors.blue, dynamicTextSize - 2),
                   // Add more tags as needed
                 ],
               ),
@@ -147,7 +175,7 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
     );
   }
 
-  Widget buildTag(String label, Color color) {
+  Widget buildTag(String label, Color color, double size) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -156,9 +184,8 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
       ),
       child: Text(
         label,
-        style: TextStyle(
-            color: WebGlobalConstants.primaryColor,
-            fontSize: WebGlobalConstants.tagSize),
+        style:
+            TextStyle(color: WebGlobalConstants.primaryColor, fontSize: size),
       ),
     );
   }

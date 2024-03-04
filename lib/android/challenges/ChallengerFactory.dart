@@ -1,6 +1,5 @@
 import 'package:challenger/android/challenges/ChallengeProgress.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
-import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
 
 

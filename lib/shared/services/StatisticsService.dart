@@ -1,24 +1,27 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/model/StatisticsModel.dart';
 import 'package:challenger/shared/services/UserManager.dart';
-import 'package:challenger/shared/model/UserModel.dart';
-
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:stomp_dart_client/stomp.dart';
-import 'package:stomp_dart_client/stomp_config.dart';
-import 'package:stomp_dart_client/stomp_frame.dart';
-
-import '../model/AssignedChallenges.dart';
 
 class StatisticsService {
   final userManager = locator<UserManagerService>();
 
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
-  static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
+  static String BACKEND_AUTH_SERVICE = "http://localhost:8080";
+
+  StatisticsService() {
+    if (kIsWeb) {
+      //web
+      BACKEND_AUTH_SERVICE = "http://localhost:8080";
+    } else {
+      //phone
+      BACKEND_AUTH_SERVICE = "http://10.0.2.2:8080";
+    }
+  }
 
   Future<StatisticsModel> getUserStatistics() async {
     print("Getting user statistics...");

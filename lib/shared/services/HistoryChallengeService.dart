@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/model/HistoryChallenges.dart';
 import 'package:challenger/shared/services/UserManager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
@@ -15,14 +16,28 @@ class HistoryChallengeService {
   final userManager = locator<UserManagerService>();
 
   // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
-  static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
-  StreamController<List<HistoryChallenge>> _historyDataController = StreamController<List<HistoryChallenge>>.broadcast();
+  static String HTTP_BACKEND_SERVICE = "http://localhost:8080";
+  static String WS_BACKEND_SERVICE = "ws://localhost:8080";
+  StreamController<List<HistoryChallenge>> _historyDataController =
+      StreamController<List<HistoryChallenge>>.broadcast();
   StompClient? stompClient;
+
+  HistoryChallengeService() {
+    if (kIsWeb) {
+      //web
+      HTTP_BACKEND_SERVICE = "http://localhost:8080";
+      WS_BACKEND_SERVICE = "ws://localhost:8080";
+    } else {
+      //phone
+      HTTP_BACKEND_SERVICE = "http://10.0.2.2:8080";
+      WS_BACKEND_SERVICE = "ws://10.0.2.2:8080";
+    }
+  }
 
   Stream<List<HistoryChallenge>> fetchHistoryData() {
     print("Getting history of challenges");
 
-    var usersUrl = Uri.parse(BACKEND_AUTH_SERVICE + '/api/v1/history');
+    var usersUrl = Uri.parse(HTTP_BACKEND_SERVICE + '/api/v1/history');
     var token = userManager.user?.token;
 
     print("Pressed " + usersUrl.toString());
@@ -33,7 +48,7 @@ class HistoryChallengeService {
 
   Future<void> connectAndSubscribe(String token) async {
     StompConfig conf = StompConfig(
-      url: 'ws://localhost:8080/websocket',
+      url: WS_BACKEND_SERVICE + '/websocket',
       onConnect: onConnectCallback,
       onWebSocketError: (e) => print(e.toString()),
       onStompError: (d) => print('error stomp'),
@@ -66,10 +81,7 @@ class HistoryChallengeService {
     // initial
     sendServerUpdate();
 
-    Timer.periodic(
-        Duration(seconds: 2),
-        (Timer t) => sendServerUpdate()
-    );
+    Timer.periodic(Duration(seconds: 2), (Timer t) => sendServerUpdate());
   }
 
   void sendServerUpdate() {
@@ -89,7 +101,7 @@ class HistoryChallengeService {
 
       String progressDateJson = item['progressDate'];
       var historyChallenge =
-      new HistoryChallenge(parseDate(progressDateJson), challenge);
+          new HistoryChallenge(parseDate(progressDateJson), challenge);
       result.add(historyChallenge);
     }
     return result;

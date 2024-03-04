@@ -4,9 +4,9 @@ import 'dart:developer';
 
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
-import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/model/UserModel.dart';
-
+import 'package:challenger/shared/services/UserManager.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
@@ -15,15 +15,27 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 import '../model/AssignedChallenges.dart';
 
 class BrowseChallengeService {
-
   final userManager = locator<UserManagerService>();
 
-  static const String BACKEND_AUTH_SERVICE = "http://localhost:8080";
-  StreamController<List<ChallengeModel>> _challengeDataController = StreamController<List<ChallengeModel>>.broadcast();
+  static String HTTP_BACKEND_SERVICE = "http://localhost:8080";
+  static String WS_BACKEND_SERVICE = "ws://localhost:8080";
+  StreamController<List<ChallengeModel>> _challengeDataController =
+      StreamController<List<ChallengeModel>>.broadcast();
   StompClient? stompClient;
 
-  Stream<List<ChallengeModel>> getBrowsableChallenges(String token) {
+  BrowseChallengeService() {
+    if (kIsWeb) {
+      //web
+      HTTP_BACKEND_SERVICE = "http://localhost:8080";
+      WS_BACKEND_SERVICE = "ws://localhost:8080";
+    } else {
+      //phone
+      HTTP_BACKEND_SERVICE = "http://10.0.2.2:8080";
+      WS_BACKEND_SERVICE = "ws://10.0.2.2:8080";
+    }
+  }
 
+  Stream<List<ChallengeModel>> getBrowsableChallenges(String token) {
     connectAndSubscribe(token!);
 
     return _challengeDataController.stream.asBroadcastStream();
@@ -31,7 +43,7 @@ class BrowseChallengeService {
 
   Future<void> connectAndSubscribe(String token) async {
     StompConfig conf = StompConfig(
-      url: 'ws://localhost:8080/websocket',
+      url: WS_BACKEND_SERVICE + '/websocket',
       onConnect: onConnectCallback,
       onWebSocketError: (e) => print(e.toString()),
       onStompError: (d) => print('error stomp'),
@@ -52,7 +64,8 @@ class BrowseChallengeService {
             // Received a frame for this subscription
             String? body = frame.body;
             List<dynamic> assignedData = jsonDecode(body!);
-            List<ChallengeModel> currentResult = getBrowseChallenges(assignedData);
+            List<ChallengeModel> currentResult =
+                getBrowseChallenges(assignedData);
 
             _challengeDataController.add(currentResult);
             // for (HistoryChallenge item in currentResult!) {
@@ -64,10 +77,7 @@ class BrowseChallengeService {
     // initial
     sendServerUpdate();
 
-    Timer.periodic(
-      Duration(seconds: 2),
-          (Timer t) => sendServerUpdate()
-    );
+    Timer.periodic(Duration(seconds: 2), (Timer t) => sendServerUpdate());
   }
 
   void sendServerUpdate() {

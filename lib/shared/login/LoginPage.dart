@@ -1,6 +1,6 @@
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/services/UserManager.dart';
 import 'package:challenger/shared/services/LoginService.dart';
+import 'package:challenger/shared/services/UserManager.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {

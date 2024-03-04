@@ -96,14 +96,98 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _getChallengesNew();
+    const phoneBreakpoint = 600;
+    const tabletBreakpoint = 900;
+
+    double screnWidth = MediaQuery.of(context).size.width;
+
+    bool isPhone = screnWidth < phoneBreakpoint;
+    bool isTablet =
+        screnWidth >= phoneBreakpoint && screnWidth < tabletBreakpoint;
+    bool isDesktop = screnWidth >= tabletBreakpoint;
+
+    // Use the boolean values to decide which widget to return
+    if (isPhone) {
+      return _phoneHome();
+    } else if (isTablet) {
+      // Assuming you have a method for tablet layout
+      return _tabletHome();
+    } else if (isDesktop) {
+      return _webHome();
+    }
+
+    // Default to web home if none of the above conditions are met
+    // This is just a safety net; ideally, one of the conditions should always be true
+    return _webHome();
   }
 
-  Widget _getChallengesNew() {
-    double taskbarHeight = MediaQuery
-        .of(context)
-        .size
-        .height * 0.05;
+  Widget _phoneHome() {
+    double cardsSizeHeight = MediaQuery.of(context).size.height * 0.5 * 0.5;
+    double cardsSizeWidth = MediaQuery.of(context).size.width;
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildBalloonCard(
+              Colors.red,
+              'Balloon 1',
+              cardsSizeHeight,
+              SummaryHomePageCard(
+                  "Assigned challenges",
+                  Icon(Icons.assignment_outlined),
+                  goToPageAssigned,
+                  getAssignedChallenges(),
+                  cardsSizeHeight,
+                  cardsSizeWidth)),
+          _buildBalloonCard(
+              Colors.blue,
+              'Balloon 2',
+              cardsSizeHeight,
+              SummaryHomePageCard(
+                  "Completed challenges",
+                  Icon(Icons.done_all_outlined),
+                  goToPageCompleted,
+                  getHistoryChallenges(),
+                  cardsSizeHeight,
+                  cardsSizeWidth)),
+          _buildBalloonCard(
+              Colors.green,
+              'Balloon 3',
+              cardsSizeHeight,
+              SummaryHomePageCard(
+                  "New challenges",
+                  Icon(Icons.new_label_outlined),
+                  goToPageBrowse,
+                  getBrowseChallenges(),
+                  cardsSizeHeight,
+                  cardsSizeWidth))
+        ],
+      ),
+    );
+  }
+
+  Widget _tabletHome() {
+    return new Text("Hello");
+  }
+
+  Widget _buildBalloonCard(
+      Color color, String text, double cardsSizeHeight, Widget innerWidget) {
+    return Card(
+      // color: color,
+      margin: EdgeInsets.all(8.0),
+      elevation: 8.0, // Adjust the elevation to control the shadow's prominence
+      child: Container(
+          height: cardsSizeHeight,
+          alignment: Alignment.center,
+          child: innerWidget),
+    );
+  }
+
+  Widget _webHome() {
+    double taskbarHeight = MediaQuery.of(context).size.height * 0.05;
+
+    double cardsSizeHeight = MediaQuery.of(context).size.height * 0.5 * 0.5;
+    double cardsSizeWidth = MediaQuery.of(context).size.width * 0.6 * 0.3;
 
     return Column(children: <Widget>[
       // First row
@@ -136,20 +220,23 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                               "Assigned challenges",
                               Icon(Icons.assignment_outlined),
                               goToPageAssigned,
-                              getAssignedChallenges()
-                          ),
+                              getAssignedChallenges(),
+                              cardsSizeHeight,
+                              cardsSizeWidth),
                           SummaryHomePageCard(
                               "Completed challenges",
                               Icon(Icons.done_all_outlined),
                               goToPageCompleted,
-                              getHistoryChallenges()
-                          ),
+                              getHistoryChallenges(),
+                              cardsSizeHeight,
+                              cardsSizeWidth),
                           SummaryHomePageCard(
                               "New challenges",
                               Icon(Icons.new_label_outlined),
                               goToPageBrowse,
-                              getBrowseChallenges()
-                          ),
+                              getBrowseChallenges(),
+                              cardsSizeHeight,
+                              cardsSizeWidth),
                         ],
                       ),
                       Expanded(
@@ -181,16 +268,16 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                   color: Colors.green,
                   child: Center(
                       child: Container(
-                        alignment: Alignment.topCenter,
-                        color: Colors.green,
-                        child: StreamBuilder<List<HistoryChallenge>>(
-                          stream: getHistoryChallenges(),
-                          // Call the function that fetches the data
-                          builder: (ctx, snapshot) {
-                            return _historyBuilder(ctx, snapshot);
-                          },
-                        ),
-                      )),
+                    alignment: Alignment.topCenter,
+                    color: Colors.green,
+                    child: StreamBuilder<List<HistoryChallenge>>(
+                      stream: getHistoryChallenges(),
+                      // Call the function that fetches the data
+                      builder: (ctx, snapshot) {
+                        return _historyBuilder(ctx, snapshot);
+                      },
+                    ),
+                  )),
                 ),
               ),
             ),
@@ -200,33 +287,32 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
       // Second row
       Expanded(
           child: Row(children: <Widget>[
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(_padding),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.indigo, // Background color
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(_roundingRadius), // Rounding value here
-                    ),
-                  ),
-                  child: Container(child: CompletedChallengesChart()),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(_padding),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.indigo, // Background color
+                borderRadius: BorderRadius.all(
+                  Radius.circular(_roundingRadius), // Rounding value here
                 ),
               ),
+              child: Container(child: CompletedChallengesChart()),
             ),
-            Expanded(
-                child: Padding(
-                    padding: EdgeInsets.all(_padding),
-                    child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.indigo, // Background color
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(
-                                _roundingRadius), // Rounding value here
-                          ),
-                        ),
-                        child: HomeCalendar()))),
-          ]))
+          ),
+        ),
+        Expanded(
+            child: Padding(
+                padding: EdgeInsets.all(_padding),
+                child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.indigo, // Background color
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(_roundingRadius), // Rounding value here
+                      ),
+                    ),
+                    child: HomeCalendar()))),
+      ]))
     ]);
   }
 
@@ -276,7 +362,8 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
   }
 
   Stream<List<ChallengeModel>>? getBrowseChallenges() {
-    return browseChallengeService.getBrowsableChallenges(widget.userManager.user!.token);
+    return browseChallengeService
+        .getBrowsableChallenges(widget.userManager.user!.token);
   }
 
   Widget _historyBuilder(BuildContext context, AsyncSnapshot snapshot) {
@@ -294,9 +381,9 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     if (snapshot.data!.isEmpty) {
       return Center(
           child: Text(
-            "No history data detected",
-            style: TextStyle(fontSize: WebGlobalConstants.h1Size),
-          ));
+        "No history data detected",
+        style: TextStyle(fontSize: WebGlobalConstants.h1Size),
+      ));
     }
 
     // Use the fetched data to populate the ListView
@@ -311,14 +398,11 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
               child: Icon(Icons.check),
             ),
             title: Text(
-                '${snapshot.data?[index].assignedChallenges?.challengeModel
-                    ?.title}'),
+                '${snapshot.data?[index].assignedChallenges?.challengeModel?.title}'),
             subtitle: Text('${snapshot.data?[index].progressDate}'),
           ),
         );
       },
     );
   }
-
-
 }
