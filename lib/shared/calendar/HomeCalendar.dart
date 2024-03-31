@@ -15,7 +15,7 @@ class HomeCalendar extends StatelessWidget {
       child: Container(
         width: cardsSizeWidth,
         height: cardsSizeHeight,
-        color: Colors.indigo,
+        color: WebGlobalConstants.primaryColor,
         child: Padding(
           padding: EdgeInsets.all(_padding),
           child: Container(

@@ -2,34 +2,33 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/model/AssignedChallenges.dart';
+import 'package:challenger/shared/card/browse/BrowseCardDetails.dart';
+import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/services/AssetService.dart';
 import 'package:challenger/web/WebGlobalConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import 'AssignedCardDetails.dart';
-
-class AssignedCard extends StatefulWidget {
+class BrowseCardChallenge extends StatefulWidget {
   final assetService = locator<AssetService>();
 
-  double width;
-  double height;
+  final double width;
+  final double height;
 
-  bool collapsed = true;
-  double cardRadius = 20;
-  double challengeProgress = 0;
+  final bool collapsed = true;
+  final double cardRadius = 20;
+  final double challengeProgress = 0;
 
-  Key key;
-  final AssignedChallenges challenge;
+  final Key key;
+  final ChallengeModel challenge;
 
-  AssignedCard(this.key, this.challenge, this.width, this.height);
+  BrowseCardChallenge(this.key, this.challenge, this.width, this.height);
 
   @override
-  State<AssignedCard> createState() => AssignedCardState();
+  State<BrowseCardChallenge> createState() => BrowseCardChallengeState();
 }
 
-class AssignedCardState extends State<AssignedCard> {
+class BrowseCardChallengeState extends State<BrowseCardChallenge> {
   double challengeProgress = 0;
   double pace = 0;
 
@@ -37,32 +36,28 @@ class AssignedCardState extends State<AssignedCard> {
 
   @override
   Widget build(BuildContext context) {
-    challengeProgress = pace *
-        (widget.challenge.maxProgress! - widget.challenge.currentProgress!);
-    pace = 100 / widget.challenge.maxProgress!;
-
     return InkWell(
       onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  AssignedCardDetails(widget.challenge, widget.key))),
+                  BrowseCardDetails(widget.challenge, widget.key))),
       child: Hero(
         tag: _specificCard +
             widget.challenge.id.toString() +
-            widget.challenge.challengeModel!.id.toString(),
+            widget.challenge.id.toString(),
         child: Container(
           child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(widget.cardRadius),
               ),
-              child: getCard(widget.challenge.challengeModel!.id)),
+              child: _getCard(widget.challenge.id)),
         ),
       ),
     );
   }
 
-  Widget getCard(int? id) {
+  Widget _getCard(int? id) {
     var url = AssetService.HTTP_BACKEND_SERVICE +
         AssetService.ASSET_SUFFIX +
         id.toString();
@@ -116,12 +111,12 @@ class AssignedCardState extends State<AssignedCard> {
                 leading: CircularPercentIndicator(
                   radius: 20.0,
                   lineWidth: 4.0,
-                  percent: widget.challenge.currentProgress! / widget.challenge.maxProgress!,
-                  center: Text((widget.challenge.currentProgress!).toString()),
+                  percent: 0.1,
+                  center: Text("1"),
                   progressColor: Colors.red,
                 ),
                 title: Text(
-                  widget.challenge.challengeModel!.title!,
+                  widget.challenge.title!,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: WebGlobalConstants.hardBlack,
@@ -135,7 +130,7 @@ class AssignedCardState extends State<AssignedCard> {
                   ),
                 ),
                 subtitle: Text(
-                  widget.challenge.challengeModel!.shortDescription!,
+                  widget.challenge.description!,
                   style: TextStyle(
                     fontSize: dynamicTextSize - 2,
                     color: WebGlobalConstants.secondBlack,
@@ -149,7 +144,7 @@ class AssignedCardState extends State<AssignedCard> {
               padding: EdgeInsets.only(
                   right: dynamicPadding * 2, left: dynamicPadding * 2),
               child: Text(
-                widget.challenge.challengeModel!.description!,
+                widget.challenge.shortDescription!,
                 style: TextStyle(
                   fontSize: dynamicTextSize - 2,
                   color: WebGlobalConstants.secondBlack,
@@ -190,7 +185,7 @@ class AssignedCardState extends State<AssignedCard> {
       child: Text(
         label,
         style:
-        TextStyle(color: WebGlobalConstants.primaryColor, fontSize: size),
+            TextStyle(color: WebGlobalConstants.primaryColor, fontSize: size),
       ),
     );
   }

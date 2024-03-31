@@ -1,4 +1,5 @@
 import 'package:challenger/shared/time/OccurrencesTransformer.dart';
+import 'package:challenger/shared/time/TagTransformer.dart';
 
 class ChallengeModel {
   int? id;
@@ -7,47 +8,43 @@ class ChallengeModel {
   String? shortDescription;
   Occurrences? occurrences;
   NetworkBlob? blob;
+  List<Tag>? badges;
 
-  ChallengeModel(int id, String title, String description, String shortDescription, Occurrences occurrences, NetworkBlob blob) {
-    this.id = id;
-    this.title = title;
-    this.description = description;
-    this.shortDescription = shortDescription;
-    this.occurrences = occurrences;
-    this.blob = blob;
-  }
+  ChallengeModel({
+    this.id,
+    this.title,
+    this.description,
+    this.shortDescription,
+    this.occurrences,
+    this.blob,
+    this.badges, // Add this parameter
+  });
 
   factory ChallengeModel.fromJson(Map<String, dynamic> json) {
+    List<dynamic> badgeJson =
+        json['badges']; // This is the incoming JSON for badges
+    List<Tag> badgeList = badgeJson
+        .map((badge) => TagTransformer.getEnumTag(badge.toString()))
+        .toList(); // Transform to List<Tag>
+
     return ChallengeModel(
-        json['id'],
-        json['title'],
-        json['description'],
-        json['shortDescription'],
-        OccurrencesTransformer.getEnumOccurrences(json['occurrences']),
-        getNetworkBlob(json['streamingFileRecord'])
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      shortDescription: json['shortDescription'],
+      occurrences: OccurrencesTransformer.getEnumOccurrences(json['occurrences']),
+      blob: getNetworkBlob(json['streamingFileRecord']),
+      badges: badgeList, // Set the transformed list
     );
   }
 
-  static List<ChallengeModel> fromList(List<dynamic> json) {
-    List<ChallengeModel> challenges = [];
-    json.forEach((element) {
-      ChallengeModel challenge = ChallengeModel(
-                element['id'],
-                element['title'],
-                element['description'],
-                element['shortDescription'],
-                OccurrencesTransformer.getEnumOccurrences(element['occurrences']),
-                getNetworkBlob(element['streamingFileRecord'])
-      );
-      challenges.add(challenge);
-    });
-    return challenges;
+  static List<ChallengeModel> fromList(List<dynamic> jsonList) {
+    return jsonList.map((json) => ChallengeModel.fromJson(json)).toList();
   }
 
   static NetworkBlob getNetworkBlob(dynamic json) {
-   return NetworkBlob(json['id'], json['name'], json['gcspath']);
+    return NetworkBlob(json['id'], json['name'], json['gcspath']);
   }
-
 
   @override
   bool operator ==(Object other) =>
@@ -85,9 +82,9 @@ class NetworkBlob {
 
   factory NetworkBlob.fromJson(Map<String, dynamic> json) {
     return NetworkBlob(
-        json['id'],
-        json['name'],
-        json['gcsPath'],
+      json['id'],
+      json['name'],
+      json['gcsPath'],
     );
   }
 }

@@ -1,10 +1,9 @@
 import 'dart:math';
 
-import 'package:challenger/shared/calendar/HomeCalendar.dart';
 import 'package:challenger/shared/card/SummaryHomePageCard.dart';
-import 'package:challenger/shared/card/home/AssignedCard.dart';
+import 'package:challenger/shared/card/assigned/AssignedCard.dart';
 import 'package:challenger/shared/chart/CompletedChallengesChart.dart';
-import 'package:challenger/shared/chart/DummyGraphsForCards.dart';
+import 'package:challenger/shared/chart/PieChartSample.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/model/HistoryChallenges.dart';
@@ -16,9 +15,9 @@ import 'package:challenger/web/WebGlobalConstants.dart';
 import 'package:challenger/web/profile/BrowseChallengeRoot.dart';
 import 'package:challenger/web/profile/ComplatedChallengesRoot.dart';
 import 'package:confetti/confetti.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import '../../../DependencyInjection.dart';
 import '../../../shared/services/HistoryChallengeService.dart';
@@ -31,13 +30,14 @@ class UserHomeWebPage extends StatefulWidget {
 
   UserHomeWebPage(this.userManager, this.context);
 
+  bool isFirstDependencyChange = true;
+
   @override
   _UserHomeWebPageState createState() => _UserHomeWebPageState();
 }
 
 class _UserHomeWebPageState extends State<UserHomeWebPage> {
   final challengeService = locator<AssignedChallengeService>();
-
   final historyChallengeService = locator<HistoryChallengeService>();
   final browseChallengeService = locator<BrowseChallengeService>();
 
@@ -49,39 +49,22 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
 
   Occurrences currentlyDisplayed = Occurrences.DAY;
 
-  var listView;
-
   final occurrences = [Occurrences.DAY, Occurrences.WEEK, Occurrences.MONTH];
+
+  final double _padding = 16.0;
+  static const double _roundingRadius = 12;
 
   List<AssignedChallenges> shownChallenges = List.empty(growable: true);
   List<AssignedCard> shownCards1 = List.empty(growable: true);
   Map<Occurrences, List<AssignedChallenges>> allChallenges = {};
 
-  final double _padding = 32.0;
-  static const double _roundingRadius = 12;
-
   Stream<List<HistoryChallenge>>? historyChallenges;
-
-  Function()? notifyParent;
-
-  // Generate some dummy data for the cahrt
-  // This will be used to draw the red line
-  final List<FlSpot> dummyData1 = List.generate(8, (index) {
-    return FlSpot(index.toDouble(), index * Random().nextDouble());
-  });
-
-  // This will be used to draw the orange line
-  final List<FlSpot> dummyData2 = List.generate(8, (index) {
-    return FlSpot(index.toDouble(), index * Random().nextDouble());
-  });
-
-  // This will be used to draw the blue line
-  final List<FlSpot> dummyData3 = List.generate(8, (index) {
-    return FlSpot(index.toDouble(), index * Random().nextDouble());
-  });
 
   @override
   void initState() {
+    challengeService.activateWebSocketConnection();
+    historyChallengeService.activateWebSocketConnection();
+
     _controllerCenterRight =
         ConfettiController(duration: const Duration(seconds: 10));
     _controllerCenterLeft =
@@ -128,7 +111,7 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          _buildBalloonCard(
+          _buildCard(
               Colors.red,
               'Balloon 1',
               cardsSizeHeight,
@@ -139,7 +122,7 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                   getAssignedChallenges(),
                   cardsSizeHeight,
                   cardsSizeWidth)),
-          _buildBalloonCard(
+          _buildCard(
               Colors.blue,
               'Balloon 2',
               cardsSizeHeight,
@@ -150,7 +133,7 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                   getHistoryChallenges(),
                   cardsSizeHeight,
                   cardsSizeWidth)),
-          _buildBalloonCard(
+          _buildCard(
               Colors.green,
               'Balloon 3',
               cardsSizeHeight,
@@ -170,7 +153,7 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     return new Text("Hello");
   }
 
-  Widget _buildBalloonCard(
+  Widget _buildCard(
       Color color, String text, double cardsSizeHeight, Widget innerWidget) {
     return Card(
       // color: color,
@@ -189,6 +172,20 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     double cardsSizeHeight = MediaQuery.of(context).size.height * 0.5 * 0.5;
     double cardsSizeWidth = MediaQuery.of(context).size.width * 0.6 * 0.3;
 
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    const double baseScreenWidth = 1024.0;
+    const double maxScaleFactor = 1.5; // Adjust this value as needed
+    const double baseTextSize = 20.0;
+
+    double scale = min(screenWidth / baseScreenWidth, maxScaleFactor);
+
+    double dynamicPadding =
+        max(24.0 * scale, 8.0); // Ensures padding is not less than 8.0
+    double dynamicTextSize = max(
+        baseTextSize * scale, 12.0); // Ensures text size is not less than 12.0
+
     return Column(children: <Widget>[
       // First row
       Expanded(
@@ -199,20 +196,9 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
               child: Padding(
                 padding: EdgeInsets.all(_padding),
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.indigo, // Background color
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(_roundingRadius), // Rounding value here
-                    ),
-                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Row(
-                        children: [],
-                      ),
-                      Spacer(flex: 1),
-                      // First sub-row for cards
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
@@ -239,23 +225,6 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
                               cardsSizeWidth),
                         ],
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: const Divider(
-                          height: 20,
-                          thickness: 1,
-                          indent: 20,
-                          endIndent: 20,
-                          color: Colors.white24,
-                        ),
-                      ),
-                      // Second sub-row which will occupy the remaining space
-                      Container(
-                        height: taskbarHeight,
-                        // Adjust this height for the taskbar size
-                        color: Colors.purple,
-                        child: Center(child: Text('Taskbar content here')),
-                      ),
                     ],
                   ),
                 ),
@@ -265,16 +234,31 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
               child: Padding(
                 padding: EdgeInsets.all(_padding),
                 child: Container(
-                  color: Colors.green,
+                  decoration: BoxDecoration(
+                    color: WebGlobalConstants.primaryColor, // Background color
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(_roundingRadius), // Rounding value here
+                    ),
+                  ),
                   child: Center(
                       child: Container(
-                    alignment: Alignment.topCenter,
-                    color: Colors.green,
+                    decoration: BoxDecoration(
+                      color: WebGlobalConstants.primaryColor,
+                      // Background color
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(_roundingRadius), // Rounding value here
+                      ),
+                    ),
                     child: StreamBuilder<List<HistoryChallenge>>(
                       stream: getHistoryChallenges(),
                       // Call the function that fetches the data
                       builder: (ctx, snapshot) {
-                        return _historyBuilder(ctx, snapshot);
+                        return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            // Aligns children to the start of the cross axis
+                            children: [
+                              _historyBuilder(ctx, snapshot),
+                            ]);
                       },
                     ),
                   )),
@@ -288,32 +272,76 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
       Expanded(
           child: Row(children: <Widget>[
         Expanded(
+          flex: 2,
           child: Padding(
             padding: EdgeInsets.all(_padding),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.indigo, // Background color
+                color: WebGlobalConstants.primaryColor, // Background color
                 borderRadius: BorderRadius.all(
                   Radius.circular(_roundingRadius), // Rounding value here
                 ),
               ),
-              child: Container(child: CompletedChallengesChart()),
+              child: Container(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: dynamicPadding, bottom: dynamicPadding),
+                      // Adjust padding as needed
+                      child: Column(
+                        children: [
+                          Text(
+                            'Weekly history summary',
+                            // Replace with your actual title
+                            style: TextStyle(
+                              color: WebGlobalConstants.hardBlack,
+                              fontWeight: FontWeight.bold,
+                              fontSize:
+                                  20, // Increase font size or adjust as needed
+                            ),
+                            textAlign: TextAlign.center, // Center the title
+                          ),
+                          Text(
+                            formatDateRange(DateTime.now()),
+                            style: TextStyle(
+                              color: WebGlobalConstants.hardBlack,
+                              // Your chosen text color
+                              fontSize: 16, // Adjust font size as needed
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(child: StackedAreaCustomColorLineChart())
+                  ])),
             ),
           ),
         ),
         Expanded(
             child: Padding(
-                padding: EdgeInsets.all(_padding),
-                child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.indigo, // Background color
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(_roundingRadius), // Rounding value here
-                      ),
-                    ),
-                    child: HomeCalendar()))),
+          padding: EdgeInsets.all(_padding),
+          child: Container(
+              decoration: BoxDecoration(
+                color: WebGlobalConstants.primaryColor,
+                // Background color
+                borderRadius: BorderRadius.all(
+                  Radius.circular(_roundingRadius), // Rounding value here
+                ),
+              ),
+              child: PieChartSample()),
+        )),
       ]))
     ]);
+  }
+
+  String formatDateRange(DateTime start) {
+    final DateFormat formatter = DateFormat('EEEE, dd MMMM');
+    final String startDate = formatter.format(start);
+    final String endDate = formatter.format(start.add(Duration(days: 7)));
+
+    return "$startDate - $endDate";
   }
 
   Future? goToPageAssigned() {
@@ -351,14 +379,12 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
     // listView = _buildViewableList();
   }
 
-  Stream<List<HistoryChallenge>>? getHistoryChallenges() {
-    this.historyChallenges =
-        historyChallengeService.fetchHistoryData().asBroadcastStream();
-    return historyChallenges?.asBroadcastStream();
+  Stream<List<HistoryChallenge>> getHistoryChallenges() {
+    return historyChallengeService.fetchHistoryData().asBroadcastStream();
   }
 
   Stream<List<AssignedChallenges>>? getAssignedChallenges() {
-    return challengeService.getUserChallenges(widget.userManager.user!.token);
+    return challengeService.getUserChallenges();
   }
 
   Stream<List<ChallengeModel>>? getBrowseChallenges() {
@@ -368,41 +394,36 @@ class _UserHomeWebPageState extends State<UserHomeWebPage> {
 
   Widget _historyBuilder(BuildContext context, AsyncSnapshot snapshot) {
     if (snapshot.connectionState == ConnectionState.waiting) {
-      return CircularProgressIndicator(); // Show a loading indicator while fetching the data
-    }
-
-    if (snapshot.hasError) {
+      return CircularProgressIndicator();
+    } else if (snapshot.hasError) {
       return Center(
         child: Text('Error: ${snapshot.error}',
             style: TextStyle(fontSize: WebGlobalConstants.h1Size)),
-      ); // Show an error message if there's an error
-    }
-
-    if (snapshot.data!.isEmpty) {
+      );
+    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
       return Center(
-          child: Text(
-        "No history data detected",
-        style: TextStyle(fontSize: WebGlobalConstants.h1Size),
-      ));
+        child: Text("No history data detected",
+            style: TextStyle(fontSize: WebGlobalConstants.h1Size)),
+      );
+    } else {
+      return Flexible(
+        // Use Flexible or ConstrainedBox as needed
+        child: ListView.builder(
+          shrinkWrap: true,
+          // Important: Setting shrinkWrap to true is necessary here to allow the ListView to occupy space only for its children.
+          itemCount: snapshot.data?.length,
+          itemBuilder: (ctx, index) {
+            return Card(
+              child: ListTile(
+                leading: CircleAvatar(child: Icon(Icons.check)),
+                title: Text(
+                    '${snapshot.data?[index].assignedChallenges?.challengeModel?.title}'),
+                subtitle: Text('${snapshot.data?[index].progressDate}'),
+              ),
+            );
+          },
+        ),
+      );
     }
-
-    // Use the fetched data to populate the ListView
-    return ListView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.all(12.0),
-      itemCount: snapshot.data?.length,
-      itemBuilder: (ctx, index) {
-        return Card(
-          child: ListTile(
-            leading: CircleAvatar(
-              child: Icon(Icons.check),
-            ),
-            title: Text(
-                '${snapshot.data?[index].assignedChallenges?.challengeModel?.title}'),
-            subtitle: Text('${snapshot.data?[index].progressDate}'),
-          ),
-        );
-      },
-    );
   }
 }

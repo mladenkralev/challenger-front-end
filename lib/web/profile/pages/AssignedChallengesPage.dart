@@ -1,17 +1,18 @@
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/card/home/AssignedCard.dart';
+import 'package:challenger/shared/card/assigned/AssignedCard.dart';
 import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';
 import 'package:flutter/material.dart';
 
-class AssignedChallengesPage extends StatelessWidget {
+class AssignedChallengesPage extends StatefulWidget {
+  @override
+  _AssignedChallengesPageState createState() => _AssignedChallengesPageState();
+}
+
+class _AssignedChallengesPageState extends State<AssignedChallengesPage> {
   final challengeService = locator<AssignedChallengeService>();
   final userManager = locator<UserManagerService>();
-
-  BuildContext context;
-
-  AssignedChallengesPage(this.context);
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +56,8 @@ class AssignedChallengesPage extends StatelessWidget {
                 'Error: ${snapshot.error}'); // Error message in case of error
           } else {
             if (snapshot.hasData && snapshot.data != null) {
-              snapshot.data
-                  ?.sort((a, b) => (a.challengeModel!.title ?? "").compareTo(b.challengeModel!.title ?? ""));
+              snapshot.data?.sort((a, b) => (a.challengeModel!.title ?? "")
+                  .compareTo(b.challengeModel!.title ?? ""));
               return Padding(
                 padding: const EdgeInsets.all(dynamicPadding),
                 child: ListView.builder(
@@ -129,7 +130,7 @@ class AssignedChallengesPage extends StatelessWidget {
   }
 
   Stream<List<AssignedChallenges>>? getShownChallenges() {
-    return challengeService.getUserChallenges(userManager.user!.token);
+    return challengeService.getUserChallenges();
   }
 
   Widget _getCard(

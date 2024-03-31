@@ -1,5 +1,5 @@
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/card/BrowseCardChallenge.dart';
+import 'package:challenger/shared/card/browse/BrowseCardChallenge.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/services/BrowseChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';

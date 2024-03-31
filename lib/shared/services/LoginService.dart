@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/model/UserModel.dart';
-import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/web/profile/UserHomeWeb.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ import 'AssetService.dart';
 import 'UserManager.dart';
 
 class LoginService {
-  final challengeService = locator<AssignedChallengeService>();
   final assetService = locator<AssetService>();
 
   late UserManagerService userManager;

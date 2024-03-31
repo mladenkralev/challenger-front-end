@@ -12,125 +12,131 @@ import 'package:stomp_dart_client/stomp_frame.dart';
 import '../model/AssignedChallenges.dart';
 
 class AssignedChallengeService {
-  final userManager = locator<UserManagerService>();
+  final UserManagerService userManager = locator<UserManagerService>();
+  static String HTTP_BACKEND_SERVICE =
+      kIsWeb ? "http://localhost:8080" : "http://10.0.2.2:8080";
+  static String WS_BACKEND_SERVICE =
+      kIsWeb ? "ws://localhost:8080/websocket" : "ws://10.0.2.2:8080/websocket";
 
-  // static const String BACKEND_AUTH_SERVICE = "http://192.168.0.103";
-  static String HTTP_BACKEND_SERVICE = "http://localhost:8080";
-  static String WS_BACKEND_SERVICE = "ws://localhost:8080";
   StreamController<List<AssignedChallenges>> _challengeDataController =
       StreamController<List<AssignedChallenges>>.broadcast();
+
   StompClient? stompClient;
+  bool _isSubscribed = false;
 
-  AssignedChallengeService() {
-    if (kIsWeb) {
-      //web
-      HTTP_BACKEND_SERVICE = "http://localhost:8080";
-      WS_BACKEND_SERVICE = "ws://localhost:8080";
-    } else {
-      //phone
-      HTTP_BACKEND_SERVICE = "http://10.0.2.2:8080";
-      WS_BACKEND_SERVICE = "ws://10.0.2.2:8080";
-    }
-  }
+  AssignedChallengeService() {}
 
-  void upgradeProgressOfChallenge(int? challengeIndex) async {
-    print("Updating progress of challenge with id" + challengeIndex.toString());
-
-    var usersUrl = Uri.parse(HTTP_BACKEND_SERVICE +
-        '/api/v1/challenges/' +
-        challengeIndex.toString() +
-        "/progress");
-    var token = userManager.user?.token;
-
-    print("Pressed " + usersUrl.toString());
-
-    final userResponse = await http.post(
-      usersUrl,
-      headers: <String, String>{
-        'Authorization': 'Bearer $token',
-        'Access-Control-Allow-Origin': 'http://siteA.com',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT',
-        'Access-Control-Allow-Headers': 'Content-Type',
+  void _initStompClient() {
+    StompConfig config = StompConfig(
+      url: WS_BACKEND_SERVICE,
+      onConnect: _onConnectCallback,
+      beforeConnect: () async {
+        print('Waiting to connect...');
+        await Future.delayed(Duration(seconds: 1));
+      },
+      onWebSocketError: (dynamic error) => print(error.toString()),
+      onStompError: (StompFrame frame) => print('STOMP Error: ${frame.body}'),
+      onDisconnect: (StompFrame frame) =>
+          {_isSubscribed = false, print('Disconnected')},
+      stompConnectHeaders: {
+        'Authorization': 'Bearer ${userManager.user?.token}'
       },
     );
 
-    print(
-        "Response from progress update " + userResponse.statusCode.toString());
+    stompClient = StompClient(config: config);
+    stompClient!.activate();
   }
 
-  void assignChallengeToCurrentUser(int? id, int? challengeIndex) async {
-    print("Assign challenge to user" + challengeIndex.toString());
+  // Method to upgrade the progress of a challenge
+  Future<void> upgradeProgressOfChallenge(int? challengeIndex) async {
+    var url = Uri.parse(
+        '$HTTP_BACKEND_SERVICE/api/v1/challenges/$challengeIndex/progress');
+    try {
+      var response = await http.post(
+        url,
+        headers: _headers(),
+      );
+      if (response.statusCode == 200) {
+        print("Progress updated successfully.");
+      } else {
+        print("Failed to update progress: ${response.body}");
+      }
+    } catch (e) {
+      print("Error upgrading progress of challenge: $e");
+    }
+    sendServerUpdate();
+  }
 
-    var usersUrl = Uri.parse(HTTP_BACKEND_SERVICE +
+  // Method to assign a challenge to the current user
+  Future<void> assignChallengeToCurrentUser(int? id, int? challengeIndex) async {
+    var url = Uri.parse(HTTP_BACKEND_SERVICE +
         '/api/v1/challenges/' +
         id!.toString() +
         '/' +
         challengeIndex.toString());
-    var token = userManager.user?.token;
-
-    print("Pressed " + usersUrl.toString());
-
-    final userResponse = await http.post(
-      usersUrl,
-      headers: <String, String>{
-        'Authorization': 'Bearer $token',
-        'Access-Control-Allow-Origin': 'http://siteA.com',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    );
-
-    print("Response from assigning challenge " +
-        userResponse.statusCode.toString());
+    try {
+      var response = await http.post(
+        url,
+        headers: _headers(),
+      );
+      if (response.statusCode == 200) {
+        print("Challenge assigned successfully.");
+      } else {
+        print("Failed to assign challenge: ${response.body}");
+      }
+    } catch (e) {
+      print("Error assigning challenge to current user: $e");
+    }
   }
 
-  Stream<List<AssignedChallenges>> getUserChallenges(String token) {
-    connectAndSubscribe(token!);
+  Map<String, String> _headers() => {
+        'Authorization': 'Bearer ${userManager.user?.token}',
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        // Adjust this according to your CORS policy
+      };
 
+  Stream<List<AssignedChallenges>> getUserChallenges() {
     return _challengeDataController.stream.asBroadcastStream();
   }
 
-  Future<void> connectAndSubscribe(String token) async {
-    StompConfig conf = StompConfig(
-      url:  WS_BACKEND_SERVICE + '/websocket',
-      onConnect: onConnectCallback,
-      onWebSocketError: (e) => print(e.toString()),
-      onStompError: (d) => print('error stomp'),
-      onDisconnect: (f) => print('disconnected'),
-    );
-
-    stompClient = StompClient(config: conf)..activate();
-
-    print(stompClient?.isActive);
+  void dispose() {
+    _challengeDataController.close();
+    stompClient?.deactivate();
   }
 
-  void onConnectCallback(StompFrame connectFrame) {
-    stompClient?.subscribe(
+  void _onConnectCallback(StompFrame frame) {
+    if (!_isSubscribed) {
+      stompClient?.subscribe(
         destination: '/assigned-response',
         headers: {},
-        callback: (frame) {
+        callback: (StompFrame frame) {
           if (frame.body != null) {
-            // Received a frame for this subscription
-            String? body = frame.body;
-            List<dynamic> assignedData = jsonDecode(body!);
+            List<dynamic> assignedData = jsonDecode(frame.body!);
             List<AssignedChallenges> currentResult =
                 getAssignedChallenges(assignedData);
-
             _challengeDataController.add(currentResult);
-            // for (HistoryChallenge item in currentResult!) {
-            //   print('ITEM: ' + item.toString());
-            // }
           }
-        });
+        },
+      );
+      _isSubscribed = true; // Mark as subscribed
+      sendServerUpdate(); // Initial update
+      // Consider if you still need this Timer here
+      Timer.periodic(Duration(seconds: 30),
+          (Timer t) => sendServerUpdate()); // Adjust frequency as needed
+    }
+  }
 
-    // initial
-    sendServerUpdate();
-
-    Timer.periodic(Duration(seconds: 2), (Timer t) => sendServerUpdate());
+  void activateWebSocketConnection() {
+    if (userManager.user?.email != null && !_isSubscribed) {
+      _initStompClient(); // This now activates the connection
+    } else {
+      sendServerUpdate(); // update
+    }
   }
 
   void sendServerUpdate() {
-    // print('Sending server an update ...');
+    print('Sending server an update ...');
     stompClient?.send(
       destination: '/assigned',
       body: userManager.user?.email,
@@ -140,13 +146,8 @@ class AssignedChallengeService {
 
   List<AssignedChallenges> getAssignedChallenges(
       List<dynamic> assignedChallenges) {
-    List<AssignedChallenges> result = [];
-    for (var item in assignedChallenges) {
-      // Access individual items in the list using the 'item' variable
-      // Perform operations or access properties of each item here
-      AssignedChallenges challenge = AssignedChallenges.fromJson(item);
-      result.add(challenge);
-    }
-    return result;
+    return assignedChallenges
+        .map((item) => AssignedChallenges.fromJson(item))
+        .toList();
   }
 }

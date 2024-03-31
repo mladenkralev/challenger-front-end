@@ -39,7 +39,7 @@ class CompletedCardDetails extends StatelessWidget {
                 decoration: new BoxDecoration(
                     image: new DecorationImage(
                       colorFilter: new ColorFilter.mode(
-                          Colors.black.withOpacity(0.5), BlendMode.dstATop),
+                          Colors.black.withOpacity(0.3), BlendMode.dstATop),
                       image: loginService.getImage(_challenge
                           .assignedChallenges!.challengeModel?.blob?.id),
                       fit: BoxFit.cover,

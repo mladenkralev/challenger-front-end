@@ -86,9 +86,13 @@ class SummaryHomePageCard extends StatelessWidget {
                     leading: CircleAvatar(
                       child: icon,
                     ),
-                    title: Text(title),
-                    subtitle:
-                        Text(DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())),
+                    title: Text(
+                      title,
+                      style: TextStyle(color: WebGlobalConstants.hardBlack),
+                    ),
+                    subtitle: Text(
+                        DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now()),
+                        style: TextStyle(color: WebGlobalConstants.hardBlack)),
                     trailing: StreamBuilder<List<dynamic>>(
                       stream: chalenges,
                       // Call the function that fetches the data

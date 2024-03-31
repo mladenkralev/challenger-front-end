@@ -1,5 +1,6 @@
 import 'package:challenger/shared/services/HistoryChallengeService.dart';
 import 'package:challenger/shared/services/StatisticsService.dart';
+import 'package:challenger/shared/services/TagColorRelationService.dart';
 import 'package:get_it/get_it.dart';
 
 import 'shared/services/AssignedChallengeService.dart';
@@ -18,4 +19,5 @@ void configureDependencies() {
   locator.registerLazySingleton<UserManagerService>(() => UserManagerService());
   locator.registerLazySingleton<AssetService>(() => AssetService());
   locator.registerLazySingleton<HistoryChallengeService>(() => HistoryChallengeService());
+  locator.registerLazySingleton<TagColorRelationService>(() => TagColorRelationService());
 }

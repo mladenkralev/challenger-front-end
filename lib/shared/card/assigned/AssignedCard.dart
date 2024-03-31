@@ -2,33 +2,38 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:challenger/DependencyInjection.dart';
-import 'package:challenger/shared/card/BrowseCardDetails.dart';
+import 'package:challenger/shared/model/AssignedChallenges.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
 import 'package:challenger/shared/services/AssetService.dart';
+import 'package:challenger/shared/services/TagColorRelationService.dart';
+import 'package:challenger/shared/time/TagTransformer.dart';
 import 'package:challenger/web/WebGlobalConstants.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-class BrowseCardChallenge extends StatefulWidget {
+import 'AssignedCardDetails.dart';
+
+class AssignedCard extends StatefulWidget {
   final assetService = locator<AssetService>();
+  final tagColorRelationService = locator<TagColorRelationService>();
 
-  final double width;
-  final double height;
+  double width;
+  double height;
 
-  final bool collapsed = true;
-  final double cardRadius = 20;
-  final double challengeProgress = 0;
+  bool collapsed = true;
+  double cardRadius = 20;
+  double challengeProgress = 0;
 
-  final Key key;
-  final ChallengeModel challenge;
+  Key key;
+  final AssignedChallenges challenge;
 
-  BrowseCardChallenge(this.key, this.challenge, this.width, this.height);
+  AssignedCard(this.key, this.challenge, this.width, this.height);
 
   @override
-  State<BrowseCardChallenge> createState() => BrowseCardChallengeState();
+  State<AssignedCard> createState() => AssignedCardState();
 }
 
-class BrowseCardChallengeState extends State<BrowseCardChallenge> {
+class AssignedCardState extends State<AssignedCard> {
   double challengeProgress = 0;
   double pace = 0;
 
@@ -36,28 +41,32 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
 
   @override
   Widget build(BuildContext context) {
+    challengeProgress = pace *
+        (widget.challenge.maxProgress! - widget.challenge.currentProgress!);
+    pace = 100 / widget.challenge.maxProgress!;
+
     return InkWell(
       onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  BrowseCardDetails(widget.challenge, widget.key))),
+                  AssignedCardDetails(widget.challenge, widget.key))),
       child: Hero(
         tag: _specificCard +
             widget.challenge.id.toString() +
-            widget.challenge.id.toString(),
+            widget.challenge.challengeModel!.id.toString(),
         child: Container(
           child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(widget.cardRadius),
               ),
-              child: _getCard(widget.challenge.id)),
+              child: getCard(widget.challenge.challengeModel!.id)),
         ),
       ),
     );
   }
 
-  Widget _getCard(int? id) {
+  Widget getCard(int? id) {
     var url = AssetService.HTTP_BACKEND_SERVICE +
         AssetService.ASSET_SUFFIX +
         id.toString();
@@ -111,12 +120,13 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
                 leading: CircularPercentIndicator(
                   radius: 20.0,
                   lineWidth: 4.0,
-                  percent: 0.1,
-                  center: Text("1"),
+                  percent: widget.challenge.currentProgress! /
+                      widget.challenge.maxProgress!,
+                  center: Text((widget.challenge.currentProgress!).toString()),
                   progressColor: Colors.red,
                 ),
                 title: Text(
-                  widget.challenge.title!,
+                  widget.challenge.challengeModel!.title!,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: WebGlobalConstants.hardBlack,
@@ -130,7 +140,7 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
                   ),
                 ),
                 subtitle: Text(
-                  widget.challenge.description!,
+                  widget.challenge.challengeModel!.shortDescription!,
                   style: TextStyle(
                     fontSize: dynamicTextSize - 2,
                     color: WebGlobalConstants.secondBlack,
@@ -144,7 +154,7 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
               padding: EdgeInsets.only(
                   right: dynamicPadding * 2, left: dynamicPadding * 2),
               child: Text(
-                widget.challenge.shortDescription!,
+                widget.challenge.challengeModel!.description!,
                 style: TextStyle(
                   fontSize: dynamicTextSize - 2,
                   color: WebGlobalConstants.secondBlack,
@@ -158,12 +168,8 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  buildTag('Strength', Colors.red, dynamicTextSize - 2),
-                  SizedBox(width: 8), // Spacing between tags
-                  buildTag('Weekly', Colors.green, dynamicTextSize - 2),
-                  SizedBox(width: 8), // Spacing between tags
-                  buildTag('Easy', Colors.blue, dynamicTextSize - 2),
-                  // Add more tags as needed
+                  buildChallengeTags(
+                      widget.challenge.challengeModel, dynamicTextSize - 2)
                 ],
               ),
             ),
@@ -172,6 +178,39 @@ class BrowseCardChallengeState extends State<BrowseCardChallenge> {
       ),
       progressIndicatorBuilder: (context, url, downloadProgress) =>
           CircularProgressIndicator(value: downloadProgress.progress),
+    );
+  }
+
+  Widget buildChallengeTags(
+      ChallengeModel? challengeModel, double dynamicTextSize) {
+    if (challengeModel == null) {
+      // Handle the null case, maybe return an empty Container or some placeholder
+      return Container();
+    }
+
+    // Sort the badges list alphabetically by their name
+    List<Tag> sortedBadges = List.from(challengeModel.badges!);
+    sortedBadges.sort((a, b) => a.toString().compareTo(b.toString()));
+
+    // Generate tag widgets dynamically based on the challengeModel.badges
+    List<Widget> tagWidgets = [];
+    for (Tag badge in sortedBadges) {
+      tagWidgets.add(buildTag(
+          badge.toString().split('.').last,
+          widget.tagColorRelationService.getColorForTag(badge),
+          dynamicTextSize - 2));
+      tagWidgets.add(SizedBox(width: 8)); // Add spacing between tags
+    }
+    if (tagWidgets.isNotEmpty)
+      tagWidgets
+          .removeLast(); // Remove the last SizedBox to avoid extra spacing
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: tagWidgets,
+      ),
     );
   }
 

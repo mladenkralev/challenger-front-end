@@ -1,16 +1,12 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:challenger/DependencyInjection.dart';
 import 'package:challenger/shared/model/ChallengeModel.dart';
+import 'package:challenger/shared/services/AssetService.dart';
 import 'package:challenger/shared/services/AssignedChallengeService.dart';
 import 'package:challenger/shared/services/HistoryChallengeService.dart';
 import 'package:challenger/shared/services/UserManager.dart';
-import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-import '../../DependencyInjection.dart';
-import '../loading/CardDetails.dart';
-import '../model/AssignedChallenges.dart';
-import '../services/AssetService.dart';
 
 class BrowseCardDetails extends StatelessWidget {
   final loginService = locator<AssetService>();
@@ -45,7 +41,7 @@ class BrowseCardDetails extends StatelessWidget {
                 decoration: new BoxDecoration(
                     image: new DecorationImage(
                       colorFilter: new ColorFilter.mode(
-                          Colors.black.withOpacity(0.5), BlendMode.dstATop),
+                          Colors.black.withOpacity(0.3), BlendMode.dstATop),
                       image: loginService
                           .getImage(_challenge.blob?.id),
                       fit: BoxFit.cover,
